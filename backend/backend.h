@@ -28,6 +28,7 @@ class Backend : public QObject
     std::vector<Arg> current_args_;
     QString current_file_path;
     QWidget* parent_;
+    QStringList command_history_;
 
 public:
     Backend(std::vector<Command> available_commands, QWidget* parent = nullptr);
@@ -50,7 +51,8 @@ signals:
     void image_updated(QImage);
     void exit_event();
     void update_status_bar_event(StatusBarInfo);
-
+private:
+    void save_to_history(const Command& command);
 };
 
 #endif // BACKEND_H

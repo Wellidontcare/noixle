@@ -3,10 +3,13 @@
 
 #include <string>
 #include <QImage>
+#include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
 
 class ImageProcessingCollection
 {
-QImage* active_image_ = nullptr;
+cv::Mat active_image_;
 public:
     ImageProcessingCollection();
     void open_image(std::string file_path);

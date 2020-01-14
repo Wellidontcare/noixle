@@ -35,12 +35,12 @@
   <customwidget>
    <class>CommandLineEdit</class>
    <extends>QLineEdit</extends>
-   <header>widgets/commandlineedit.h</header>
+   <header>frontend/widgets/commandlineedit.h</header>
   </customwidget>
   <customwidget>
    <class>ZoomEnabledGraphicsView</class>
    <extends>QGraphicsView</extends>
-   <header>widgets/zoomenabledgraphicsview.h</header>
+   <header>frontend/widgets/zoomenabledgraphicsview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

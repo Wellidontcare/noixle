@@ -45,7 +45,9 @@ void Backend::open_image()
     QString file_path;
     if(current_args_.empty())
     {
-        file_path = QFileDialog::getOpenFileName(parent_, "Select an image file", QStandardPaths::writableLocation(QStandardPaths::PicturesLocation));
+        file_path = QFileDialog::getOpenFileName(parent_,
+                                                 "Select an image file",
+                                                 QStandardPaths::writableLocation(QStandardPaths::PicturesLocation));
         image_processor_.open_image(file_path.toStdString());
     }
     else
@@ -90,6 +92,34 @@ QString Backend::image_format()
         return "BGR30";
     case QImage::Format_RGB16:
         return "RGB16";
+    case QImage::Format_RGB30:
+        return "RGB30";
+    case QImage::Format_RGB32:
+        return "RGB32";
+    case QImage::Format_ARGB32:
+        return "ARGB32";
+    case QImage::Format_Alpha8:
+        return "Alpha8";
+    case QImage::Format_RGB444:
+        return "RGB444";
+    case QImage::Format_RGB555:
+        return "RGB555";
+    case QImage::Format_RGB666:
+        return "RGB666";
+    case QImage::Format_RGB888:
+        return "RGB888";
+    case QImage::Format_RGBA64:
+        return "RGBA64";
+    case QImage::Format_RGBX64:
+        return "RGBX64";
+    case QImage::Format_Invalid:
+        return "Invalid";
+    case QImage::Format_RGBA8888:
+        return "RGBA8888";
+    case QImage::Format_RGBX8888:
+        return "RGBX8888";
+    case QImage::Format_Grayscale8:
+        return "Grayscale8";
     default:
         return "Not implemented yet";
     }
@@ -100,6 +130,7 @@ void Backend::execute_command(QString command)
     Command exec = parser_.parse(command.toStdString().c_str());
     current_args_ = exec.args;
     (this->*function_lut_.at(std::string(exec.command)))();
+
 }
 
 void Backend::update_status_bar(int x, int y)
@@ -115,4 +146,14 @@ void Backend::update_status_bar(int x, int y)
         image_format()
     };
     emit update_status_bar_event(info);
+}
+
+void Backend::save_to_history(const Command &command)
+{
+    QString rec_string = command.command.c_str();
+    for(auto arg : command.args){
+        rec_string += " ";
+        rec_string += arg.string_arg.c_str();
+    }
+    command_history_.append(rec_string);
 }

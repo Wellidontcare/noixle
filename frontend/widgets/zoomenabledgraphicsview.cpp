@@ -31,3 +31,8 @@ void ZoomEnabledGraphicsView::show_text(QString text)
     scene_.addText(text);
     fitInView(scene_.itemsBoundingRect(), Qt::KeepAspectRatio);
 }
+
+void ZoomEnabledGraphicsView::resizeEvent(QResizeEvent *event)
+{
+    fitInView(scene_.itemsBoundingRect(), Qt::AspectRatioMode::KeepAspectRatioByExpanding);
+}

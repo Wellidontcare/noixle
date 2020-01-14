@@ -21,6 +21,10 @@ public slots:
 signals:
     void update_status_bar(int x, int y);
 
+
+    // QWidget interface
+protected:
+    void resizeEvent(QResizeEvent *event) override;
 };
 
 #endif // ZOOMENABLEDGRAPHICSVIEW_H

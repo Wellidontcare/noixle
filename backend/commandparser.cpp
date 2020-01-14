@@ -1,10 +1,7 @@
 #include "commandparser.h"
 
 CommandParser::CommandParser(const std::vector<Command>& available_commands)
-    : available_commands_(available_commands)
-{
-
-}
+    : available_commands_(available_commands) {}
 
 Command CommandParser::parse(const char *input)
 {
@@ -22,7 +19,7 @@ Command CommandParser::parse(const char *input)
                          [command](const Command& command_){return command_.command == command;});
     if(available_command != available_commands_.end()){
         int num_args_allowed = available_command->num_arguments;
-        int num_args = args.size();
+        int num_args = static_cast<int>(args.size());
         if(num_args_allowed != num_args){
             if(!(args.empty() && available_command->no_arguments_allowed)){
                 throw std::logic_error("Invalid number of arguments");
