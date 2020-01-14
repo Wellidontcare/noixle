@@ -8,6 +8,7 @@
 #include <utility>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <fstream>
 
 struct StatusBarInfo{
     QPoint pos;
@@ -29,6 +30,8 @@ class Backend : public QObject
     QString current_file_path;
     QWidget* parent_;
     QStringList command_history_;
+    int record_start_index;
+    int record_stop_index;
 
 public:
     Backend(std::vector<Command> available_commands, QWidget* parent = nullptr);
@@ -39,6 +42,10 @@ public:
     void open_image();
     void invert();
     void save();
+    void snapshot();
+    void record();
+    void history();
+    void load_macro();
     QString image_format();
 
 public slots:
@@ -51,8 +58,12 @@ signals:
     void image_updated(QImage);
     void exit_event();
     void update_status_bar_event(StatusBarInfo);
+    void snapshot_taken(QImage, QString);
+    void history_requested(QString);
+
 private:
-    void save_to_history(const Command& command);
+    void save_to_history(QString command, QString args);
+    void execute_macro(QString file_path);
 };
 
 #endif // BACKEND_H

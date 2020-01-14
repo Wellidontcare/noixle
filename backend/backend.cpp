@@ -15,6 +15,10 @@ void Backend::populate_function_lut()
     function_lut_["help"] = &Backend::help;
     function_lut_["exit"] = &Backend::exit;
     function_lut_["save"] = &Backend::save;
+    function_lut_["snapshot"] = &Backend::snapshot;
+    function_lut_["record"] = &Backend::record;
+    function_lut_["history"] = &Backend::history;
+    function_lut_["load_macro"] = &Backend::load_macro;
 
 }
 
@@ -48,6 +52,9 @@ void Backend::open_image()
         file_path = QFileDialog::getOpenFileName(parent_,
                                                  "Select an image file",
                                                  QStandardPaths::writableLocation(QStandardPaths::PicturesLocation));
+        if(file_path.toStdString().empty()){
+            return;
+        }
         image_processor_.open_image(file_path.toStdString());
     }
     else
@@ -61,6 +68,7 @@ void Backend::open_image()
         }
     }
     update_view();
+    save_to_history("open", file_path);
     current_file_path = file_path;
 }
 
@@ -68,6 +76,7 @@ void Backend::invert()
 {
     image_processor_.invert_image();
     update_view();
+    save_to_history("invert", "");
 }
 
 void Backend::save()
@@ -79,7 +88,70 @@ void Backend::save()
     else{
         file_path = current_args_[0].string_arg;
     }
+    if(file_path.empty()){
+        return;
+    }
+    save_to_history("save", file_path.c_str());
     image_processor_.save_image(file_path);
+}
+
+void Backend::snapshot()
+{
+    emit snapshot_taken(image_processor_.get(), current_file_path);
+    save_to_history("snapshot", "");
+}
+
+void Backend::record()
+{
+    if(current_args_[0].string_arg == "start"){
+        record_start_index = command_history_.size();
+    }
+    else if(current_args_[0].string_arg == "stop"){
+        record_stop_index = command_history_.size();
+        auto doc_location = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+        QString filename = QFileDialog::getSaveFileName(nullptr, "Select location to save macro", doc_location);
+        std::fstream save_file(filename.toStdString(), std::ios::app);
+        for(int i = record_start_index; i < record_stop_index; ++i){
+            save_file << command_history_[i].toStdString() << '\n';
+        }
+    }
+    else{
+        throw std::logic_error("Invalid arguments");
+    }
+}
+
+void Backend::history()
+{
+    QString hist_string = "";
+    for(QString command : command_history_){
+        hist_string += command + '\n';
+    }
+    emit history_requested(hist_string);
+}
+
+void Backend::load_macro()
+{
+    QString file_path;
+    if(current_args_.empty())
+    {
+        file_path = QFileDialog::getOpenFileName(parent_,
+                                                 "Select the macro file",
+                                                 QStandardPaths::writableLocation(QStandardPaths::PicturesLocation));
+        if(file_path.toStdString().empty()){
+            return;
+        }
+    }
+    else
+    {
+        file_path = QString::fromStdString(current_args_[0].string_arg);
+        if(QFile::exists(file_path)){
+            image_processor_.open_image(current_args_[0].string_arg.c_str());
+        }
+        else{
+            throw std::logic_error("Image does not exist!");
+        }
+    }
+    execute_macro(file_path);
 }
 
 QString Backend::image_format()
@@ -130,7 +202,6 @@ void Backend::execute_command(QString command)
     Command exec = parser_.parse(command.toStdString().c_str());
     current_args_ = exec.args;
     (this->*function_lut_.at(std::string(exec.command)))();
-
 }
 
 void Backend::update_status_bar(int x, int y)
@@ -148,12 +219,16 @@ void Backend::update_status_bar(int x, int y)
     emit update_status_bar_event(info);
 }
 
-void Backend::save_to_history(const Command &command)
+void Backend::save_to_history(QString command, QString args)
 {
-    QString rec_string = command.command.c_str();
-    for(auto arg : command.args){
-        rec_string += " ";
-        rec_string += arg.string_arg.c_str();
+    command_history_.append(command + " " + args);
+}
+
+void Backend::execute_macro(QString file_path)
+{
+    std::fstream macro_file(file_path.toStdString());
+    std::string command;
+    while(getline(macro_file, command)){
+        execute_command(command.c_str());
     }
-    command_history_.append(rec_string);
 }

@@ -9,7 +9,8 @@ MainWindow::MainWindow(QWidget *parent)
     ,file_path_label_(new QLabel("No image loaded"))
     ,options_()
     ,backend_(new Backend(add_available_commands(), parent))
-    , ui(new Ui::MainWindow)
+    ,snapshot_window_(new SnapshotWindow)
+    ,ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     ui->lineEdit->populate_options(options_);
@@ -23,6 +24,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->graphicsView, &ZoomEnabledGraphicsView::update_status_bar, backend_, &Backend::update_status_bar);
     connect(backend_, &Backend::update_status_bar_event, this, &MainWindow::update_status_bar);
     connect(backend_, &Backend::exit_event, qApp, &QApplication::closeAllWindows);
+    connect(backend_, &Backend::snapshot_taken, snapshot_window_, &SnapshotWindow::add_snapshot);
+    connect(backend_, &Backend::history_requested, ui->graphicsView, &ZoomEnabledGraphicsView::show_text);
 }
 MainWindow::~MainWindow()
 {
@@ -64,7 +67,11 @@ std::vector<Command> MainWindow::add_available_commands()
         {"invert", {}, true, {}, 0, "inverts the currently opened image"},
         {"help", {}, true, {}, 0, "shows this message"},
         {"exit", {}, true, {}, 0, "exits the programm"},
-        {"save", {}, true, {}, 1, "[file_path (optional)] saves the currently opened image"}
+        {"save", {}, true, {}, 1, "[file_path (optional)] saves the currently opened image"},
+        {"snapshot", {}, true, {}, 0, "Saves the image as snapshot and displays it in a new tab-window"},
+        {"history", {}, true, {}, 0, "Shows the command history"},
+        {"record", {}, false, {STRING}, 1, "[start | stop] starts or stops the command recording"},
+        {"load_macro", {}, true, {STRING}, 1, "Loads and plays a recorded macro"}
     };
     for(Command c : commands){
         options_.append(QString::fromStdString(c.command));

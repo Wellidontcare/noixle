@@ -5,8 +5,8 @@
 #include <QMessageBox>
 #include <QLabel>
 #include <backend/backend.h>
+#include <frontend/widgets/snapshotwindow.h>
 
-//!TODO implement snapshot (opens new window with all snapshots (first time) then adds snapshot to tabview)
 //!TODO implement history
 //!TODO implement histogramm [mode]
 //!TODO implement export [histogramm | image]
@@ -29,6 +29,7 @@ class MainWindow : public QMainWindow
     QLabel* file_path_label_;
     QStringList options_;
     Backend* backend_;
+    SnapshotWindow* snapshot_window_;
 
 public:
     MainWindow(QWidget *parent = nullptr);

@@ -32,6 +32,9 @@ void ImageProcessingCollection::save_image(std::string file_path)
 
 QImage ImageProcessingCollection::get()
 {
+   if(active_image_.empty()){
+        throw std::logic_error("No image loaded");
+   }
    cv::Mat rb_swapped;
    cv::cvtColor(active_image_, rb_swapped, CV_BGR2RGB);
    return QImage(static_cast<uchar*>(rb_swapped.data),

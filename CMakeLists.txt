@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+ cmake_minimum_required(VERSION 3.5)
 
 project(noixle LANGUAGES CXX)
 
@@ -22,6 +22,9 @@ FILE(GLOB NOIXLE_SRC
     frontend/widgets/commandlineedit.cpp
     frontend/widgets/zoomenabledgraphicsview.h
     frontend/widgets/zoomenabledgraphicsview.cpp
+    frontend/widgets/snapshotwindow.h
+    frontend/widgets/snapshotwindow.cpp
+    frontend/widgets/snapshotwindow.ui
     backend/imageprocessingcollection.h
     backend/imageprocessingcollection.cpp
     backend/commandparser.h

@@ -18,6 +18,7 @@ void CommandLineEdit::keyPressEvent(QKeyEvent* event)
     }
     case Qt::Key::Key_Return:{
         emit enter_execute_event(text());
+        setText("");
         return;
     }
     default:{
@@ -49,6 +50,5 @@ void CommandLineEdit::insert_completion(const QString &completion){
     if(completer->widget() != this){
         return;
     }
-   //setText(completion);
 }
 
