@@ -83,7 +83,9 @@ void Backend::save()
 {
     std::string file_path;
     if(current_args_.empty()){
-        file_path = QFileDialog::getSaveFileName(parent_, "Save image", QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)).toStdString();
+        file_path = QFileDialog::getSaveFileName(parent_,
+                                                 "Save image",
+                                                 QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)).toStdString();
     }
     else{
         file_path = current_args_[0].string_arg;
@@ -180,10 +182,10 @@ QString Backend::image_format()
         return "RGB666";
     case QImage::Format_RGB888:
         return "RGB888";
-    case QImage::Format_RGBA64:
+    /*case QImage::Format_RGBA64:
         return "RGBA64";
     case QImage::Format_RGBX64:
-        return "RGBX64";
+        return "RGBX64";*/
     case QImage::Format_Invalid:
         return "Invalid";
     case QImage::Format_RGBA8888:
