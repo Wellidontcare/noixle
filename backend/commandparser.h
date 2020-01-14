@@ -2,8 +2,9 @@
 #define COMMANDPARSER_H
 #include <unordered_map>
 #include <sstream>
-#include <functional>
 #include <algorithm>
+#include <string>
+#include <vector>
 
 enum TYPE{
     INT,

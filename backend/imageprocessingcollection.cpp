@@ -1,9 +1,6 @@
 #include "imageprocessingcollection.h"
 
-ImageProcessingCollection::ImageProcessingCollection()
-{
-
-}
+ImageProcessingCollection::ImageProcessingCollection() {}
 
 void ImageProcessingCollection::open_image(std::string file_path)
 {
@@ -36,7 +33,7 @@ QImage ImageProcessingCollection::get()
         throw std::logic_error("No image loaded");
    }
    cv::Mat rb_swapped;
-   cv::cvtColor(active_image_, rb_swapped, CV_BGR2RGB);
+   cv::cvtColor(active_image_, rb_swapped, cv::COLOR_BGR2RGB);
    return QImage(static_cast<uchar*>(rb_swapped.data),
                   rb_swapped.cols, rb_swapped.rows,
                   rb_swapped.step,
