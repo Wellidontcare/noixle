@@ -52,5 +52,7 @@ QImage ImageProcessingCollection::get()
                      static_cast<int>(active_image_.step),
                      QImage::Format_Grayscale8).copy();
    }
+   else{
+       throw std::logic_error("Invalid image format");
    }
-
+}

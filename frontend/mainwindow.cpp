@@ -3,10 +3,6 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    ,pos_label_(new QLabel("0 0"))
-    ,rgb_label_(new QLabel("0 0 0"))
-    ,format_label_(new QLabel("None"))
-    ,file_path_label_(new QLabel("No image loaded"))
     ,options_()
     ,backend_(new Backend(add_available_commands(), parent))
     ,snapshot_window_(new SnapshotWindow)
@@ -14,18 +10,15 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     ui->lineEdit->populate_options(options_);
-    ui->statusbar->addWidget(pos_label_);
-    ui->statusbar->addWidget(rgb_label_);
-    ui->statusbar->addWidget(format_label_);
-    ui->statusbar->addWidget(file_path_label_);
     connect(backend_, &Backend::image_updated, ui->graphicsView, &ZoomEnabledGraphicsView::update_image);
     connect(backend_, &Backend::help_requested, ui->graphicsView, &ZoomEnabledGraphicsView::show_text);
     connect(ui->lineEdit, &CommandLineEdit::enter_execute_event, this, &MainWindow::execute_command);
-    connect(ui->graphicsView, &ZoomEnabledGraphicsView::update_status_bar, backend_, &Backend::update_status_bar);
+    connect(ui->graphicsView, &ZoomEnabledGraphicsView::update_status_bar_sig, backend_, &Backend::update_status_bar);
     connect(backend_, &Backend::update_status_bar_event, this, &MainWindow::update_status_bar);
     connect(backend_, &Backend::exit_event, qApp, &QApplication::closeAllWindows);
     connect(backend_, &Backend::snapshot_taken, snapshot_window_, &SnapshotWindow::add_snapshot);
     connect(backend_, &Backend::history_requested, ui->graphicsView, &ZoomEnabledGraphicsView::show_text);
+    connect(backend_, &Backend::performance_info_requested, this, &MainWindow::show_performance_info);
 }
 MainWindow::~MainWindow()
 {
@@ -60,6 +53,13 @@ void MainWindow::update_status_bar(StatusBarInfo info)
     file_path_label_->setText(file_path);
 }
 
+void MainWindow::show_performance_info(QString performance_info)
+{
+    if(backend_->meassure_perf()){
+        QMessageBox::information(this, "Performance report", performance_info);
+    }
+}
+
 std::vector<Command> MainWindow::add_available_commands()
 {
     std::vector<Command> commands = {
@@ -72,7 +72,8 @@ std::vector<Command> MainWindow::add_available_commands()
         {"history", {}, true, {}, 0, "Shows the command history"},
         {"record", {}, false, {STRING}, 1, "[start | stop] starts or stops the command recording"},
         {"load_macro", {}, true, {STRING}, 1, "Loads and plays a recorded macro"},
-        {"filter", {}, false, {STRING, INT}, 2, "['median' | 'gaussian' | 'binomial' | 'sobel' | 'dilate' | 'erode' | 'laplace' size"}
+        {"filter", {}, false, {STRING, INT}, 2, "['median' | 'gaussian' | 'binomial' | 'sobel' | 'dilate' | 'erode' | 'laplace' size"},
+        {"toggle_perf_meassurement",{}, true, {}, 0, "Toggles the performance meassurement"}
     };
     for(Command c : commands){
         options_.append(QString::fromStdString(c.command));

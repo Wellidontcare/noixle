@@ -48,6 +48,6 @@ cv::Mat FilterParser::parse_kernel(QString kernel_string)
         else{
             throw std::logic_error("Encountered invalid character in filter kernel");
         }
-        return kernel;
     }
-};
+    return kernel;
+}

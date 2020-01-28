@@ -24,13 +24,22 @@ FILE(GLOB NOIXLE_SRC
     frontend/widgets/zoomenabledgraphicsview.cpp
     frontend/widgets/snapshotwindow.h
     frontend/widgets/snapshotwindow.cpp
+    frontend/widgets/mousetrackerpixmapitem.cpp
+    frontend/widgets/mousetrackerpixmapitem.h
     frontend/widgets/snapshotwindow.ui
+    frontend/widgets/statusbar.h
+    frontend/widgets/statusbar.cpp
     backend/imageprocessingcollection.h
     backend/imageprocessingcollection.cpp
     backend/commandparser.h
     backend/backend.cpp
     backend/backend.h
+    backend/filterparser.h
+    backend/filterparser.cpp
     backend/commandparser.cpp
+    backend/command.h
+    backend/timer.h
+    backend/timer.cpp
     frontend/mainwindow.ui
 )
 

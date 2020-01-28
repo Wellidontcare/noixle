@@ -12,6 +12,9 @@
 #include "commandparser.h"
 #include "filterparser.h"
 #include "imageprocessingcollection.h"
+#include "timer.h"
+
+#define TIME_THIS Timer timer; connect(&timer, &Timer::meassured_time, this, &Backend::show_performance_info);
 
 struct StatusBarInfo{
     QPoint pos;
@@ -27,6 +30,7 @@ struct BackendData{
     QStringList command_history;
     int record_start_index;
     int record_stop_index;
+    bool meassure_perf = false;
 };
 
 class Backend : public QObject
@@ -43,7 +47,6 @@ class Backend : public QObject
 
 public:
     Backend(std::vector<Command> available_commands, QWidget* parent = nullptr);
-    void populate_function_lut();
     void update_view();
     void help();
     void exit();
@@ -55,11 +58,13 @@ public:
     void history();
     void load_macro();
     void filter();
-    QString image_format();
+    void toggle_meassure_perf();
+    bool meassure_perf();
 
 public slots:
     void execute_command(QString command);
     void update_status_bar(int x, int y);
+    void show_performance_info(QString time_taken);
 
 
 signals:
@@ -69,10 +74,13 @@ signals:
     void update_status_bar_event(StatusBarInfo);
     void snapshot_taken(QImage, QString);
     void history_requested(QString);
+    void performance_info_requested(QString);
 
 private:
     void save_to_history(QString command, QString args);
     void execute_macro(QString file_path);
+    void populate_function_lut();
+    QString image_format();
 };
 
 #endif // BACKEND_H

@@ -23,10 +23,7 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-    QLabel* pos_label_;
-    QLabel* rgb_label_;
-    QLabel* format_label_;
-    QLabel* file_path_label_;
+
     QStringList options_;
     Backend* backend_;
     SnapshotWindow* snapshot_window_;
@@ -36,6 +33,7 @@ public:
     ~MainWindow() override;
     void execute_command(QString command);
     void update_status_bar(StatusBarInfo info);
+    void show_performance_info(QString performance_info);
 
 private:
     Ui::MainWindow *ui;

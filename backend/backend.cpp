@@ -2,9 +2,9 @@
 
 Backend::Backend(std::vector<Command> available_commands, QWidget* parent)
     : parser_(available_commands),
-      available_commands_(available_commands),
       parent_(parent)
 {
+    data_.available_commands = available_commands;
     populate_function_lut();
 }
 
@@ -20,6 +20,7 @@ void Backend::populate_function_lut()
     function_lut_["history"] = &Backend::history;
     function_lut_["load_macro"] = &Backend::load_macro;
     function_lut_["filter"] = &Backend::filter;
+    function_lut_["toggle_perf_meassurement"] = &Backend::toggle_meassure_perf;
 
 }
 
@@ -75,7 +76,10 @@ void Backend::open_image()
 
 void Backend::invert()
 {
+    {
+    TIME_THIS
     image_processor_.invert_image();
+    }
     update_view();
     save_to_history("invert", "");
 }
@@ -162,6 +166,16 @@ void Backend::filter()
     FilterID id = FilterParser::parse(data_.current_args[0].string_arg.c_str());
 }
 
+void Backend::toggle_meassure_perf()
+{
+    data_.meassure_perf = ~data_.meassure_perf;
+}
+
+bool Backend::meassure_perf()
+{
+    return data_.meassure_perf;
+}
+
 QString Backend::image_format()
 {
     QImage::Format format = image_processor_.get().format();
@@ -225,6 +239,11 @@ void Backend::update_status_bar(int x, int y)
         image_format()
     };
     emit update_status_bar_event(info);
+}
+
+void Backend::show_performance_info(QString time_taken)
+{
+    emit performance_info_requested("Function took: " + time_taken);
 }
 
 void Backend::save_to_history(QString command, QString args)
