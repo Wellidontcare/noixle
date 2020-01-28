@@ -71,7 +71,8 @@ std::vector<Command> MainWindow::add_available_commands()
         {"snapshot", {}, true, {}, 0, "Saves the image as snapshot and displays it in a new tab-window"},
         {"history", {}, true, {}, 0, "Shows the command history"},
         {"record", {}, false, {STRING}, 1, "[start | stop] starts or stops the command recording"},
-        {"load_macro", {}, true, {STRING}, 1, "Loads and plays a recorded macro"}
+        {"load_macro", {}, true, {STRING}, 1, "Loads and plays a recorded macro"},
+        {"filter", {}, false, {STRING, INT}, 2, "['median' | 'gaussian' | 'binomial' | 'sobel' | 'dilate' | 'erode' | 'laplace' size"}
     };
     for(Command c : commands){
         options_.append(QString::fromStdString(c.command));

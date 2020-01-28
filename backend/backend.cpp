@@ -19,6 +19,7 @@ void Backend::populate_function_lut()
     function_lut_["record"] = &Backend::record;
     function_lut_["history"] = &Backend::history;
     function_lut_["load_macro"] = &Backend::load_macro;
+    function_lut_["filter"] = &Backend::filter;
 
 }
 
@@ -30,7 +31,7 @@ void Backend::update_view()
 void Backend::help()
 {
     QString help_text = "Available Commands:\n\n";
-    for(Command c : available_commands_){
+    for(Command c : data_.available_commands){
         help_text += c.command.c_str();
         help_text += " -> ";
         help_text += c.help_text.c_str();
@@ -47,7 +48,7 @@ void Backend::exit()
 void Backend::open_image()
 {
     QString file_path;
-    if(current_args_.empty())
+    if(data_.current_args.empty())
     {
         file_path = QFileDialog::getOpenFileName(parent_,
                                                  "Select an image file",
@@ -59,9 +60,9 @@ void Backend::open_image()
     }
     else
     {
-        file_path = QString::fromStdString(current_args_[0].string_arg);
+        file_path = QString::fromStdString(data_.current_args[0].string_arg);
         if(QFile::exists(file_path)){
-            image_processor_.open_image(current_args_[0].string_arg.c_str());
+            image_processor_.open_image(data_.current_args[0].string_arg.c_str());
         }
         else{
             throw std::logic_error("Image does not exist!");
@@ -69,7 +70,7 @@ void Backend::open_image()
     }
     update_view();
     save_to_history("open", file_path);
-    current_file_path = file_path;
+    data_.current_file_path = file_path;
 }
 
 void Backend::invert()
@@ -82,13 +83,13 @@ void Backend::invert()
 void Backend::save()
 {
     std::string file_path;
-    if(current_args_.empty()){
+    if(data_.current_args.empty()){
         file_path = QFileDialog::getSaveFileName(parent_,
                                                  "Save image",
                                                  QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)).toStdString();
     }
     else{
-        file_path = current_args_[0].string_arg;
+        file_path = data_.current_args[0].string_arg;
     }
     if(file_path.empty()){
         return;
@@ -99,22 +100,22 @@ void Backend::save()
 
 void Backend::snapshot()
 {
-    emit snapshot_taken(image_processor_.get(), current_file_path);
+    emit snapshot_taken(image_processor_.get(), data_.current_file_path);
     save_to_history("snapshot", "");
 }
 
 void Backend::record()
 {
-    if(current_args_[0].string_arg == "start"){
-        record_start_index = command_history_.size();
+    if(data_.current_args[0].string_arg == "start"){
+        data_.record_start_index = data_.command_history.size();
     }
-    else if(current_args_[0].string_arg == "stop"){
-        record_stop_index = command_history_.size();
+    else if(data_.current_args[0].string_arg == "stop"){
+        data_.record_stop_index = data_.command_history.size();
         auto doc_location = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
         QString filename = QFileDialog::getSaveFileName(nullptr, "Select location to save macro", doc_location);
         std::fstream save_file(filename.toStdString(), std::ios::app);
-        for(int i = record_start_index; i < record_stop_index; ++i){
-            save_file << command_history_[i].toStdString() << '\n';
+        for(int i = data_.record_start_index; i < data_.record_stop_index; ++i){
+            save_file << data_.command_history[i].toStdString() << '\n';
         }
     }
     else{
@@ -125,7 +126,7 @@ void Backend::record()
 void Backend::history()
 {
     QString hist_string = "";
-    for(QString command : command_history_){
+    for(QString command : data_.command_history){
         hist_string += command + '\n';
     }
     emit history_requested(hist_string);
@@ -134,7 +135,7 @@ void Backend::history()
 void Backend::load_macro()
 {
     QString file_path;
-    if(current_args_.empty())
+    if(data_.current_args.empty())
     {
         file_path = QFileDialog::getOpenFileName(parent_,
                                                  "Select the macro file",
@@ -145,15 +146,20 @@ void Backend::load_macro()
     }
     else
     {
-        file_path = QString::fromStdString(current_args_[0].string_arg);
+        file_path = QString::fromStdString(data_.current_args[0].string_arg);
         if(QFile::exists(file_path)){
-            image_processor_.open_image(current_args_[0].string_arg.c_str());
+            image_processor_.open_image(data_.current_args[0].string_arg.c_str());
         }
         else{
             throw std::logic_error("Image does not exist!");
         }
     }
     execute_macro(file_path);
+}
+
+void Backend::filter()
+{
+    FilterID id = FilterParser::parse(data_.current_args[0].string_arg.c_str());
 }
 
 QString Backend::image_format()
@@ -202,20 +208,20 @@ QString Backend::image_format()
 void Backend::execute_command(QString command)
 {
     Command exec = parser_.parse(command.toStdString().c_str());
-    current_args_ = exec.args;
+    data_.current_args = exec.args;
     (this->*function_lut_.at(std::string(exec.command)))();
 }
 
 void Backend::update_status_bar(int x, int y)
 {
-    if(current_file_path == ""){
+    if(data_.current_file_path == ""){
         return;
     }
 
     StatusBarInfo info = {
         QPoint(x, y),
         {0, 0, 0},
-        current_file_path,
+        data_.current_file_path,
         image_format()
     };
     emit update_status_bar_event(info);
@@ -223,7 +229,7 @@ void Backend::update_status_bar(int x, int y)
 
 void Backend::save_to_history(QString command, QString args)
 {
-    command_history_.append(command + " " + args);
+    data_.command_history.append(command + " " + args);
 }
 
 void Backend::execute_macro(QString file_path)

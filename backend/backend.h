@@ -1,14 +1,17 @@
 #ifndef BACKEND_H
 #define BACKEND_H
-#include "commandparser.h"
-#include "imageprocessingcollection.h"
-#include <QObject>
-#include <unordered_map>
+
+#include <fstream>
 #include <functional>
-#include <utility>
+#include <QObject>
 #include <QFileDialog>
 #include <QStandardPaths>
-#include <fstream>
+#include <unordered_map>
+#include <utility>
+
+#include "commandparser.h"
+#include "filterparser.h"
+#include "imageprocessingcollection.h"
 
 struct StatusBarInfo{
     QPoint pos;
@@ -17,21 +20,26 @@ struct StatusBarInfo{
     QString format;
 };
 
+struct BackendData{
+    std::vector<Command> available_commands;
+    std::vector<Arg> current_args;
+    QString current_file_path;
+    QStringList command_history;
+    int record_start_index;
+    int record_stop_index;
+};
+
 class Backend : public QObject
 {
     typedef void (Backend::*fn_ptr)();
     Q_OBJECT
 
     CommandParser parser_;
-    std::vector<Command> available_commands_;
     ImageProcessingCollection image_processor_;
     std::unordered_map<std::string, fn_ptr> function_lut_;
-    std::vector<Arg> current_args_;
-    QString current_file_path;
     QWidget* parent_;
-    QStringList command_history_;
-    int record_start_index;
-    int record_stop_index;
+    BackendData data_;
+
 
 public:
     Backend(std::vector<Command> available_commands, QWidget* parent = nullptr);
@@ -46,6 +54,7 @@ public:
     void record();
     void history();
     void load_macro();
+    void filter();
     QString image_format();
 
 public slots:
