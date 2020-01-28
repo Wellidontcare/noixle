@@ -17,14 +17,10 @@ void ZoomEnabledGraphicsView::update_image(QImage image)
 {
  scene_.clear();
  QPixmap pixmap = QPixmap::fromImage(image);
- if(image_item_){
-     disconnect(image_item_, &MouseTrackerPixmapItem::mouse_hovers_pixel, this, &ZoomEnabledGraphicsView::emit_update_status_bar_sig);
-     delete image_item_;
- }
  image_item_ = new MouseTrackerPixmapItem(pixmap);
  scene_.addItem(image_item_);
- scene_.addPixmap(pixmap);
- connect(image_item_, &MouseTrackerPixmapItem::mouse_hovers_pixel, this, &ZoomEnabledGraphicsView::emit_update_status_bar_sig);
+ scene_.setSceneRect(image_item_->sceneBoundingRect());
+ connect(image_item_, &MouseTrackerPixmapItem::mouse_hovers_pixel_sig, this, &ZoomEnabledGraphicsView::emit_update_status_bar_sig);
  fitInView(scene_.itemsBoundingRect(), Qt::KeepAspectRatio);
 }
 

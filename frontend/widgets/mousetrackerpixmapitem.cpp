@@ -7,5 +7,5 @@ MouseTrackerPixmapItem::MouseTrackerPixmapItem(QPixmap pixmap)
 
 void MouseTrackerPixmapItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
-    emit mouse_hovers_pixel(event->pos().x(), event->pos().y());
+    emit mouse_hovers_pixel_sig(event->pos().x(), event->pos().y());
 }

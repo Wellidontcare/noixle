@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <backend/backend.h>
 #include <frontend/widgets/snapshotwindow.h>
+#include <frontend/widgets/statusbar.h>
 
 //!TODO implement history
 //!TODO implement histogramm [mode]
@@ -32,7 +33,6 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
     void execute_command(QString command);
-    void update_status_bar(StatusBarInfo info);
     void show_performance_info(QString performance_info);
 
 private:

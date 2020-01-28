@@ -17,7 +17,7 @@ public:
     Command parse(const char* input);
 
 private:
-    bool has_correct_types(Command command, std::vector<Arg>& args);
+    bool has_correct_types(const Command& command, std::vector<Arg>& args);
 };
 
 #endif // COMMANDPARSER_H

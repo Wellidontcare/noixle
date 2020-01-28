@@ -25,7 +25,7 @@ class FilterParser
 {
 public:
     FilterParser() = delete;
-    static FilterID parse(QString filter_string);
+    static FilterID parse(const QString& filter_string);
 private:
     static cv::Mat parse_kernel(QString kernel_string);
 

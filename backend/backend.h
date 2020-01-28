@@ -9,28 +9,24 @@
 #include <unordered_map>
 #include <utility>
 
-#include "commandparser.h"
-#include "filterparser.h"
-#include "imageprocessingcollection.h"
-#include "timer.h"
-
-#define TIME_THIS Timer timer; connect(&timer, &Timer::meassured_time, this, &Backend::show_performance_info);
-
-struct StatusBarInfo{
-    QPoint pos;
-    std::vector<unsigned char> color_vals;
-    QString file_name;
-    QString format;
-};
+#include "parser/commandparser.h"
+#include "parser/filterparser.h"
+#include "image_processing/imageprocessingcollection.h"
+#include "timer/timer.h"
+#include "timer/timethismacro.h"
+#include "statusbarinfo.h"
 
 struct BackendData{
     std::vector<Command> available_commands;
-    std::vector<Arg> current_args;
     QString current_file_path;
+    std::vector<Arg> current_args;
     QStringList command_history;
     int record_start_index;
     int record_stop_index;
+    JImage active_image;
     bool meassure_perf = false;
+    int snapshot_count = 0;
+    int active_snapshot_idx = 0;
 };
 
 class Backend : public QObject
@@ -39,7 +35,6 @@ class Backend : public QObject
     Q_OBJECT
 
     CommandParser parser_;
-    ImageProcessingCollection image_processor_;
     std::unordered_map<std::string, fn_ptr> function_lut_;
     QWidget* parent_;
     BackendData data_;
@@ -51,6 +46,7 @@ public:
     void help();
     void exit();
     void open_image();
+    void load_snapshot();
     void invert();
     void save();
     void snapshot();
@@ -60,26 +56,31 @@ public:
     void filter();
     void toggle_meassure_perf();
     bool meassure_perf();
+    void revert();
 
 public slots:
     void execute_command(QString command);
-    void update_status_bar(int x, int y);
+    void update_status_bar_on_load();
+    void update_status_bar_dynamic(int x, int y);
     void show_performance_info(QString time_taken);
+    void set_active_snapshot(int idx);
 
 
 signals:
-    void help_requested(QString);
-    void image_updated(QImage);
-    void exit_event();
-    void update_status_bar_event(StatusBarInfo);
-    void snapshot_taken(QImage, QString);
-    void history_requested(QString);
-    void performance_info_requested(QString);
+    void help_request_sig(QString);
+    void image_updated_sig(QImage);
+    void exit_sig();
+    void update_status_bar_sig(StatusBarInfoStatic);
+    void update_status_bar_dynamic_sig(StatusBarInfoDynamic);
+    void snapshot_taken_sig(JImage);
+    void history_requested_sig(QString);
+    void performance_info_requested_sig(QString);
 
 private:
     void save_to_history(QString command, QString args);
     void execute_macro(QString file_path);
     void populate_function_lut();
+    void backup();
     QString image_format();
 };
 

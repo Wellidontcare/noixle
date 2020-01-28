@@ -1,6 +1,5 @@
 #ifndef COMMAND_H
 #define COMMAND_H
-#endif // COMMAND_H
 
 #include <string>
 #include <vector>
@@ -25,3 +24,4 @@ struct Command{
     int num_arguments;
     std::string help_text;
 };
+#endif // COMMAND_H

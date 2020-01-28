@@ -1,6 +1,6 @@
 #include "filterparser.h"
 
-FilterID FilterParser::parse(QString filter_string)
+FilterID FilterParser::parse(const QString& filter_string)
 {
     if(filter_string.startsWith("[") && filter_string.endsWith("]"))
         return {false, NONE, parse_kernel(filter_string)};

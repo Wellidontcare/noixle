@@ -29,17 +29,21 @@ FILE(GLOB NOIXLE_SRC
     frontend/widgets/snapshotwindow.ui
     frontend/widgets/statusbar.h
     frontend/widgets/statusbar.cpp
-    backend/imageprocessingcollection.h
-    backend/imageprocessingcollection.cpp
-    backend/commandparser.h
+    backend/image_processing/imageprocessingcollection.h
+    backend/image_processing/imageprocessingcollection.cpp
     backend/backend.cpp
     backend/backend.h
-    backend/filterparser.h
-    backend/filterparser.cpp
-    backend/commandparser.cpp
-    backend/command.h
-    backend/timer.h
-    backend/timer.cpp
+    backend/parser/filterparser.h
+    backend/parser/filterparser.cpp
+    backend/timer/timethismacro.h
+    backend/image_processing/jimage.cpp
+    backend/image_processing/jimage.h
+    backend/statusbarinfo.h
+    backend/parser/commandparser.cpp
+    backend/parser/commandparser.h
+    backend/parser/command.h
+    backend/timer/timer.h
+    backend/timer/timer.cpp
     frontend/mainwindow.ui
 )
 

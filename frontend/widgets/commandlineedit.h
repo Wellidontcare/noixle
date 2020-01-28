@@ -25,7 +25,7 @@ public slots:
     void insert_completion(const QString& completion);
 
 signals:
-    void enter_execute_event(QString);
+    void enter_execute_sig(QString);
 };
 
 #endif // COMMANDLINEEDIT_H

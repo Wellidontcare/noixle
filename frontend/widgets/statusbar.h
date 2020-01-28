@@ -1,7 +1,11 @@
 #ifndef STATUSBAR_H
 #define STATUSBAR_H
-#include <QStatusBar>
+
 #include <QLabel>
+#include <QStatusBar>
+#include <QWidget>
+
+#include "backend/statusbarinfo.h"
 class StatusBar : public QStatusBar
 {
     Q_OBJECT
@@ -9,10 +13,15 @@ class StatusBar : public QStatusBar
     QLabel* rgb_label_;
     QLabel* format_label_;
     QLabel* file_path_label_;
+    QLabel* dimensions_label_;
+    QLabel* spacer_;
 public:
-    StatusBar();
-    void update_dynamic(QString position, QString RGB_or_gray_val);
-    void update_on_image_load(QString file_path, QString dimensions, QString format);
+    StatusBar(QWidget* parent = nullptr);
+    ~StatusBar();
+
+public slots:
+    void update_dynamic(StatusBarInfoDynamic info);
+    void update_on_image_load(StatusBarInfoStatic info);
 };
 
 #endif // STATUSBAR_H
