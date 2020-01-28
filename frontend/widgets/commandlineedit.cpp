@@ -17,7 +17,7 @@ void CommandLineEdit::keyPressEvent(QKeyEvent* event)
         return;
     }
     case Qt::Key::Key_Return:{
-        emit enter_execute_event(text());
+        emit enter_execute_sig(text());
         setText("");
         return;
     }

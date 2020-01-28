@@ -4,6 +4,7 @@
 #include <QTabWidget>
 #include <QHBoxLayout>
 #include <vector>
+#include "backend/image_processing/jimage.h"
 #include "zoomenabledgraphicsview.h"
 
 namespace Ui {
@@ -15,14 +16,13 @@ class SnapshotWindow : public QTabWidget
     QHBoxLayout* layout_;
     Q_OBJECT
     std::vector<ZoomEnabledGraphicsView*> views_;
-    std::vector<QString> file_paths_;
 
 public:
     explicit SnapshotWindow(QWidget *parent = nullptr);
     ~SnapshotWindow();
 
 public slots:
-    void add_snapshot(QImage image, QString file_path);
+    void add_snapshot(JImage);
 signals:
 
 private:

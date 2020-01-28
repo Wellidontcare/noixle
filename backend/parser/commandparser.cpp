@@ -37,7 +37,7 @@ Command CommandParser::parse(const char *input)
     throw std::logic_error("This is not a valid command");
 }
 
-bool CommandParser::has_correct_types(Command command, std::vector<Arg>& args)
+bool CommandParser::has_correct_types(const Command& command, std::vector<Arg>& args)
 {
     for(size_t i = 0; i < args.size(); ++i){
         switch (command.valid_types[i]) {

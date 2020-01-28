@@ -2,9 +2,9 @@
 
 Backend::Backend(std::vector<Command> available_commands, QWidget* parent)
     : parser_(available_commands),
-      available_commands_(available_commands),
       parent_(parent)
 {
+    data_.available_commands = available_commands;
     populate_function_lut();
 }
 
@@ -19,35 +19,47 @@ void Backend::populate_function_lut()
     function_lut_["record"] = &Backend::record;
     function_lut_["history"] = &Backend::history;
     function_lut_["load_macro"] = &Backend::load_macro;
+    function_lut_["filter"] = &Backend::filter;
+    function_lut_["toggle_perf_meassurement"] = &Backend::toggle_meassure_perf;
+    function_lut_["load_snapshot"] = &Backend::load_snapshot;
+    function_lut_["revert"] = &Backend::revert;
 
+}
+
+void Backend::backup()
+{
+    QString file_path = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+    ImageProcessingCollection::save_image(data_.active_image, (file_path + "/backup_img.tif").toStdString());
 }
 
 void Backend::update_view()
 {
-    emit image_updated(image_processor_.get());
+    if(data_.active_image.empty())
+        throw std::logic_error("No images loaded");
+    emit image_updated_sig(data_.active_image.as_qimage());
 }
 
 void Backend::help()
 {
     QString help_text = "Available Commands:\n\n";
-    for(Command c : available_commands_){
+    for(Command c : data_.available_commands){
         help_text += c.command.c_str();
         help_text += " -> ";
         help_text += c.help_text.c_str();
         help_text += '\n';
     }
-    emit help_requested(help_text);
+    emit help_request_sig(help_text);
 }
 
 void Backend::exit()
 {
-    emit exit_event();
+    emit exit_sig();
 }
 
 void Backend::open_image()
 {
     QString file_path;
-    if(current_args_.empty())
+    if(data_.current_args.empty())
     {
         file_path = QFileDialog::getOpenFileName(parent_,
                                                  "Select an image file",
@@ -55,26 +67,49 @@ void Backend::open_image()
         if(file_path.toStdString().empty()){
             return;
         }
-        image_processor_.open_image(file_path.toStdString());
+        data_.active_image = ImageProcessingCollection::open_image(file_path.toStdString());
     }
     else
     {
-        file_path = QString::fromStdString(current_args_[0].string_arg);
+        file_path = QString::fromStdString(data_.current_args[0].string_arg);
         if(QFile::exists(file_path)){
-            image_processor_.open_image(current_args_[0].string_arg.c_str());
+           data_.active_image = ImageProcessingCollection::open_image(data_.current_args[0].string_arg);
         }
         else{
             throw std::logic_error("Image does not exist!");
         }
     }
     update_view();
+    update_status_bar_on_load();
     save_to_history("open", file_path);
-    current_file_path = file_path;
+}
+
+void Backend::load_snapshot()
+{
+    int indx = data_.active_snapshot_idx;
+    QString file_path = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+    if(data_.current_args.empty()){
+        QString path = file_path + "/Snapshot" + QString::number(indx) + ".tif";
+        if(!QFile(path).exists()){
+            throw std::logic_error("Can't load snapshot");
+        }
+        data_.current_args = {{0, 0, path.toStdString()}};
+        open_image();
+    }
+    else{
+        QString path = file_path + "/Snapshot" + QString::number(data_.current_args[0].int_arg) + ".tif";
+        data_.current_args = {{0, 0, path.toStdString()}};
+        open_image();
+    }
+
 }
 
 void Backend::invert()
 {
-    image_processor_.invert_image();
+    {
+    TIME_THIS
+    ImageProcessingCollection::invert_image(data_.active_image, data_.active_image);
+    }
     update_view();
     save_to_history("invert", "");
 }
@@ -82,37 +117,42 @@ void Backend::invert()
 void Backend::save()
 {
     std::string file_path;
-    if(current_args_.empty()){
-        file_path = QFileDialog::getSaveFileName(parent_, "Save image", QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)).toStdString();
+    if(data_.current_args.empty()){
+        file_path = QFileDialog::getSaveFileName(parent_,
+                                                 "Save image",
+                                                 QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)).toStdString();
     }
     else{
-        file_path = current_args_[0].string_arg;
+        file_path = data_.current_args[0].string_arg;
     }
     if(file_path.empty()){
         return;
     }
     save_to_history("save", file_path.c_str());
-    image_processor_.save_image(file_path);
+    ImageProcessingCollection::save_image(data_.active_image, file_path);
 }
 
 void Backend::snapshot()
 {
-    emit snapshot_taken(image_processor_.get(), current_file_path);
+    QString file_path = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+    ImageProcessingCollection::save_image(data_.active_image, (file_path + "/Snapshot" + QString::number(data_.snapshot_count)).toStdString() + ".tif");
+    data_.snapshot_count++;
+    emit snapshot_taken_sig(data_.active_image);
     save_to_history("snapshot", "");
 }
 
 void Backend::record()
 {
-    if(current_args_[0].string_arg == "start"){
-        record_start_index = command_history_.size();
+    if(data_.current_args[0].string_arg == "start"){
+        data_.record_start_index = data_.command_history.size();
     }
-    else if(current_args_[0].string_arg == "stop"){
-        record_stop_index = command_history_.size();
+    else if(data_.current_args[0].string_arg == "stop"){
+        data_.record_stop_index = data_.command_history.size();
         auto doc_location = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
         QString filename = QFileDialog::getSaveFileName(nullptr, "Select location to save macro", doc_location);
         std::fstream save_file(filename.toStdString(), std::ios::app);
-        for(int i = record_start_index; i < record_stop_index; ++i){
-            save_file << command_history_[i].toStdString() << '\n';
+        for(int i = data_.record_start_index; i < data_.record_stop_index; ++i){
+            save_file << data_.command_history[i].toStdString() << '\n';
         }
     }
     else{
@@ -123,16 +163,16 @@ void Backend::record()
 void Backend::history()
 {
     QString hist_string = "";
-    for(QString command : command_history_){
+    for(QString command : data_.command_history){
         hist_string += command + '\n';
     }
-    emit history_requested(hist_string);
+    emit history_requested_sig(hist_string);
 }
 
 void Backend::load_macro()
 {
     QString file_path;
-    if(current_args_.empty())
+    if(data_.current_args.empty())
     {
         file_path = QFileDialog::getOpenFileName(parent_,
                                                  "Select the macro file",
@@ -143,85 +183,82 @@ void Backend::load_macro()
     }
     else
     {
-        file_path = QString::fromStdString(current_args_[0].string_arg);
-        if(QFile::exists(file_path)){
-            image_processor_.open_image(current_args_[0].string_arg.c_str());
-        }
-        else{
-            throw std::logic_error("Image does not exist!");
+        file_path = QString::fromStdString(data_.current_args[0].string_arg);
+        if(!QFile::exists(file_path)){
+            throw std::logic_error("File does not exist");
         }
     }
     execute_macro(file_path);
 }
 
-QString Backend::image_format()
+void Backend::filter()
 {
-    QImage::Format format = image_processor_.get().format();
-    switch(format){
-    case QImage::Format_Mono:
-        return "Mono";
-    case QImage::Format_BGR30:
-        return "BGR30";
-    case QImage::Format_RGB16:
-        return "RGB16";
-    case QImage::Format_RGB30:
-        return "RGB30";
-    case QImage::Format_RGB32:
-        return "RGB32";
-    case QImage::Format_ARGB32:
-        return "ARGB32";
-    case QImage::Format_Alpha8:
-        return "Alpha8";
-    case QImage::Format_RGB444:
-        return "RGB444";
-    case QImage::Format_RGB555:
-        return "RGB555";
-    case QImage::Format_RGB666:
-        return "RGB666";
-    case QImage::Format_RGB888:
-        return "RGB888";
-    case QImage::Format_RGBA64:
-        return "RGBA64";
-    case QImage::Format_RGBX64:
-        return "RGBX64";
-    case QImage::Format_Invalid:
-        return "Invalid";
-    case QImage::Format_RGBA8888:
-        return "RGBA8888";
-    case QImage::Format_RGBX8888:
-        return "RGBX8888";
-    case QImage::Format_Grayscale8:
-        return "Grayscale8";
-    default:
-        return "Not implemented yet";
-    }
+    FilterID id = FilterParser::parse(data_.current_args[0].string_arg.c_str());
+}
+
+void Backend::toggle_meassure_perf()
+{
+    data_.meassure_perf = ~data_.meassure_perf;
+}
+
+bool Backend::meassure_perf()
+{
+    return data_.meassure_perf;
+}
+
+void Backend::revert()
+{
+    QString file_path = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+    if(!QFile(file_path + "/backup_img.tif").exists())
+        throw std::logic_error("Revert not possible");
+    data_.current_args = {{0, 0, (file_path + "/backup_img.tif").toStdString()}};
+    open_image();
 }
 
 void Backend::execute_command(QString command)
 {
+    if(command != "open" && command != "revert"){
+        backup();
+    }
     Command exec = parser_.parse(command.toStdString().c_str());
-    current_args_ = exec.args;
+    data_.current_args = exec.args;
     (this->*function_lut_.at(std::string(exec.command)))();
 }
 
-void Backend::update_status_bar(int x, int y)
+void Backend::update_status_bar_on_load()
 {
-    if(current_file_path == ""){
-        return;
-    }
-
-    StatusBarInfo info = {
-        QPoint(x, y),
-        {0, 0, 0},
-        current_file_path,
-        image_format()
+    JImage& image = data_.active_image;
+    StatusBarInfoStatic info = {
+        image.get_file_path().c_str(),
+        image.type_as_string().c_str(),
+        QSize(image.rows, image.cols)
     };
-    emit update_status_bar_event(info);
+    emit update_status_bar_sig(info);
+}
+
+void Backend::update_status_bar_dynamic(int x, int y)
+{
+    JImage& image = data_.active_image;
+    emit update_status_bar_dynamic_sig(StatusBarInfoDynamic{y,
+                                                            x,
+                                                            image.r_val_at(y, x),
+                                       image.g_val_at(y, x),
+                                       image.b_val_at(y, x)});
+}
+
+void Backend::show_performance_info(QString time_taken)
+{
+    emit performance_info_requested_sig("Function took: " + time_taken);
+}
+
+void Backend::set_active_snapshot(int idx)
+{
+    data_.active_snapshot_idx = idx;
 }
 
 void Backend::save_to_history(QString command, QString args)
 {
-    command_history_.append(command + " " + args);
+    data_.command_history.append(command + " " + args);
 }
 
 void Backend::execute_macro(QString file_path)

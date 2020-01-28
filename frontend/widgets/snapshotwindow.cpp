@@ -17,16 +17,15 @@ SnapshotWindow::~SnapshotWindow()
     }
 }
 
-void SnapshotWindow::add_snapshot(QImage image, QString file_path)
+void SnapshotWindow::add_snapshot(JImage image)
 {
     auto view = new ZoomEnabledGraphicsView(this);
-    addTab(view, file_path);
+    addTab(view, image.get_file_path().c_str());
     auto scene = new QGraphicsScene;
-    auto pixmap = QPixmap::fromImage(image);
+    auto pixmap = QPixmap::fromImage(image.as_qimage());
     scene->addPixmap(pixmap);
     view->setScene(scene);
     views_.emplace_back(view);
-    file_paths_.emplace_back(file_path);
     show();
     setCurrentIndex(count() - 1);
     view->fitInView(scene->itemsBoundingRect(), Qt::AspectRatioMode::KeepAspectRatio);

@@ -3,29 +3,25 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    ,pos_label_(new QLabel("0 0"))
-    ,rgb_label_(new QLabel("0 0 0"))
-    ,format_label_(new QLabel("None"))
-    ,file_path_label_(new QLabel("No image loaded"))
     ,options_()
     ,backend_(new Backend(add_available_commands(), parent))
-    ,snapshot_window_(new SnapshotWindow)
+    ,snapshot_window_(new SnapshotWindow(this))
     ,ui(new Ui::MainWindow)
 {
+    snapshot_window_->setWindowFlag(Qt::Window);
     ui->setupUi(this);
     ui->lineEdit->populate_options(options_);
-    ui->statusbar->addWidget(pos_label_);
-    ui->statusbar->addWidget(rgb_label_);
-    ui->statusbar->addWidget(format_label_);
-    ui->statusbar->addWidget(file_path_label_);
-    connect(backend_, &Backend::image_updated, ui->graphicsView, &ZoomEnabledGraphicsView::update_image);
-    connect(backend_, &Backend::help_requested, ui->graphicsView, &ZoomEnabledGraphicsView::show_text);
-    connect(ui->lineEdit, &CommandLineEdit::enter_execute_event, this, &MainWindow::execute_command);
-    connect(ui->graphicsView, &ZoomEnabledGraphicsView::update_status_bar, backend_, &Backend::update_status_bar);
-    connect(backend_, &Backend::update_status_bar_event, this, &MainWindow::update_status_bar);
-    connect(backend_, &Backend::exit_event, qApp, &QApplication::closeAllWindows);
-    connect(backend_, &Backend::snapshot_taken, snapshot_window_, &SnapshotWindow::add_snapshot);
-    connect(backend_, &Backend::history_requested, ui->graphicsView, &ZoomEnabledGraphicsView::show_text);
+    connect(backend_, &Backend::image_updated_sig, ui->graphicsView, &ZoomEnabledGraphicsView::update_image);
+    connect(backend_, &Backend::help_request_sig, ui->graphicsView, &ZoomEnabledGraphicsView::show_text);
+    connect(ui->lineEdit, &CommandLineEdit::enter_execute_sig, this, &MainWindow::execute_command);
+    connect(ui->graphicsView, &ZoomEnabledGraphicsView::update_status_bar_sig, backend_, &Backend::update_status_bar_dynamic);
+    connect(backend_, &Backend::update_status_bar_sig, ui->statusbar, &StatusBar::update_on_image_load);
+    connect(backend_, &Backend::update_status_bar_dynamic_sig, ui->statusbar, &StatusBar::update_dynamic);
+    connect(backend_, &Backend::exit_sig, qApp, &QApplication::closeAllWindows);
+    connect(backend_, &Backend::snapshot_taken_sig, snapshot_window_, &SnapshotWindow::add_snapshot);
+    connect(backend_, &Backend::history_requested_sig, ui->graphicsView, &ZoomEnabledGraphicsView::show_text);
+    connect(backend_, &Backend::performance_info_requested_sig, this, &MainWindow::show_performance_info);
+    connect(snapshot_window_, &SnapshotWindow::currentChanged, backend_, &Backend::set_active_snapshot);
 }
 MainWindow::~MainWindow()
 {
@@ -42,22 +38,11 @@ void MainWindow::execute_command(QString command)
     }
 }
 
-void MainWindow::update_status_bar(StatusBarInfo info)
+void MainWindow::show_performance_info(QString performance_info)
 {
-    QString xy = QString::number(info.pos.x()) + " " + QString::number(info.pos.y());
-    QString rgb = "";
-    rgb += QString::number(info.color_vals[0]);
-    info.color_vals.erase(info.color_vals.begin());
-    for(int i : info.color_vals){
-        rgb += " ";
-        rgb += QString::number(i);
+    if(backend_->meassure_perf()){
+        QMessageBox::information(this, "Performance report", performance_info);
     }
-    QString format = info.format;
-    QString file_path = info.file_name;
-    pos_label_->setText(xy);
-    rgb_label_->setText(rgb);
-    format_label_->setText(format);
-    file_path_label_->setText(file_path);
 }
 
 std::vector<Command> MainWindow::add_available_commands()
@@ -71,7 +56,11 @@ std::vector<Command> MainWindow::add_available_commands()
         {"snapshot", {}, true, {}, 0, "Saves the image as snapshot and displays it in a new tab-window"},
         {"history", {}, true, {}, 0, "Shows the command history"},
         {"record", {}, false, {STRING}, 1, "[start | stop] starts or stops the command recording"},
-        {"load_macro", {}, true, {STRING}, 1, "Loads and plays a recorded macro"}
+        {"load_macro", {}, true, {STRING}, 1, "Loads and plays a recorded macro"},
+        {"load_snapshot", {}, true, {INT}, 1, "Loads the selected snapshot"},
+        {"filter", {}, false, {STRING, INT}, 2, "['median' | 'gaussian' | 'binomial' | 'sobel' | 'dilate' | 'erode' | 'laplace' size"},
+        {"toggle_perf_meassurement",{}, true, {}, 0, "Toggles the performance meassurement"},
+        {"revert", {}, true, {}, 0, "Reverts back to last state"}
     };
     for(Command c : commands){
         options_.append(QString::fromStdString(c.command));
