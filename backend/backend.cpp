@@ -1,4 +1,4 @@
-#include "backend.h"
+﻿#include "backend.h"
 
 Backend::Backend(std::vector<Command> available_commands, QWidget* parent)
     : parser_(available_commands),
@@ -28,8 +28,34 @@ void Backend::populate_function_lut()
 
 void Backend::backup()
 {
-    QString file_path = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
-    ImageProcessingCollection::save_image(data_.active_image, (file_path + "/backup_img.tif").toStdString());
+    QString tmp_location = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+    QString backup_img_file_path = tmp_location + "/backup_img.tif";
+    ImageProcessingCollection::save_image(data_.active_image, backup_img_file_path.toStdString());
+}
+
+void Backend::set_args(const std::vector<Arg> &args)
+{
+    data_.current_args = args;
+}
+
+Arg Backend::construct_arg(int arg)
+{
+    return {arg, 0, ""};
+}
+
+Arg Backend::construct_arg(double arg)
+{
+    return {0, arg, ""};
+}
+
+Arg Backend::construct_arg(std::string arg)
+{
+    return {0, 0, arg};
+}
+
+Arg Backend::construct_arg(QString arg)
+{
+    return {0, 0, arg.toStdString()};
 }
 
 void Backend::update_view()
@@ -58,21 +84,21 @@ void Backend::exit()
 
 void Backend::open_image()
 {
-    QString file_path;
+    QString open_file_path;
     if(data_.current_args.empty())
     {
-        file_path = QFileDialog::getOpenFileName(parent_,
+        open_file_path = QFileDialog::getOpenFileName(parent_,
                                                  "Select an image file",
                                                  QStandardPaths::writableLocation(QStandardPaths::PicturesLocation));
-        if(file_path.toStdString().empty()){
+        if(open_file_path.toStdString().empty()){
             return;
         }
-        data_.active_image = ImageProcessingCollection::open_image(file_path.toStdString());
+        data_.active_image = ImageProcessingCollection::open_image(open_file_path.toStdString());
     }
     else
     {
-        file_path = QString::fromStdString(data_.current_args[0].string_arg);
-        if(QFile::exists(file_path)){
+        open_file_path = QString::fromStdString(data_.current_args[0].string_arg);
+        if(QFile::exists(open_file_path)){
            data_.active_image = ImageProcessingCollection::open_image(data_.current_args[0].string_arg);
         }
         else{
@@ -81,24 +107,25 @@ void Backend::open_image()
     }
     update_view();
     update_status_bar_on_load();
-    save_to_history("open", file_path);
+    save_to_history("open", open_file_path);
 }
 
 void Backend::load_snapshot()
 {
     int indx = data_.active_snapshot_idx;
-    QString file_path = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+    QString tmp_file_path = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
     if(data_.current_args.empty()){
-        QString path = file_path + "/Snapshot" + QString::number(indx) + ".tif";
-        if(!QFile(path).exists()){
+        QString snaphot_img_path = tmp_file_path + "/Snapshot" + QString::number(indx) + ".tif";
+        if(!QFile(snaphot_img_path).exists()){
             throw std::logic_error("Can't load snapshot");
         }
-        data_.current_args = {{0, 0, path.toStdString()}};
+        set_args({construct_arg(snaphot_img_path)});
         open_image();
     }
     else{
-        QString path = file_path + "/Snapshot" + QString::number(data_.current_args[0].int_arg) + ".tif";
-        data_.current_args = {{0, 0, path.toStdString()}};
+        int snapshot_idx = data_.current_args[0].int_arg;
+        QString snapshot_img_path = tmp_file_path + "/Snapshot" + QString::number(snapshot_idx) + ".tif";
+        set_args({construct_arg(snapshot_img_path)});
         open_image();
     }
 
@@ -134,8 +161,9 @@ void Backend::save()
 
 void Backend::snapshot()
 {
-    QString file_path = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
-    ImageProcessingCollection::save_image(data_.active_image, (file_path + "/Snapshot" + QString::number(data_.snapshot_count)).toStdString() + ".tif");
+    QString tmp_file_path = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+    QString snapshot_img_file_path = tmp_file_path + "/Snapshot" + QString::number(data_.snapshot_count) + ".tif";
+    ImageProcessingCollection::save_image(data_.active_image, snapshot_img_file_path.toStdString());
     data_.snapshot_count++;
     emit snapshot_taken_sig(data_.active_image);
     save_to_history("snapshot", "");
@@ -143,10 +171,11 @@ void Backend::snapshot()
 
 void Backend::record()
 {
-    if(data_.current_args[0].string_arg == "start"){
+    std::string record_arg = data_.current_args[0].string_arg;
+    if(record_arg == "start"){
         data_.record_start_index = data_.command_history.size();
     }
-    else if(data_.current_args[0].string_arg == "stop"){
+    else if(record_arg == "stop"){
         data_.record_stop_index = data_.command_history.size();
         auto doc_location = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
         QString filename = QFileDialog::getSaveFileName(nullptr, "Select location to save macro", doc_location);
@@ -162,7 +191,7 @@ void Backend::record()
 
 void Backend::history()
 {
-    QString hist_string = "";
+    QString hist_string;
     for(QString command : data_.command_history){
         hist_string += command + '\n';
     }
@@ -208,10 +237,11 @@ bool Backend::meassure_perf()
 
 void Backend::revert()
 {
-    QString file_path = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
-    if(!QFile(file_path + "/backup_img.tif").exists())
+    QString tmp_file_path = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+    QString backup_img_file_path = tmp_file_path + "/backup_img.tif";
+    if(!QFile(backup_img_file_path).exists())
         throw std::logic_error("Revert not possible");
-    data_.current_args = {{0, 0, (file_path + "/backup_img.tif").toStdString()}};
+    set_args({construct_arg(backup_img_file_path)});
     open_image();
 }
 
@@ -221,7 +251,7 @@ void Backend::execute_command(QString command)
         backup();
     }
     Command exec = parser_.parse(command.toStdString().c_str());
-    data_.current_args = exec.args;
+    set_args(exec.args);
     (this->*function_lut_.at(std::string(exec.command)))();
 }
 
@@ -239,16 +269,16 @@ void Backend::update_status_bar_on_load()
 void Backend::update_status_bar_dynamic(int x, int y)
 {
     JImage& image = data_.active_image;
-    emit update_status_bar_dynamic_sig(StatusBarInfoDynamic{y,
-                                                            x,
-                                                            image.r_val_at(y, x),
-                                       image.g_val_at(y, x),
-                                       image.b_val_at(y, x)});
+    int r = image.r_val_at(y, x);
+    int g = image.g_val_at(y, x);
+    int b = image.b_val_at(y, x);
+    emit update_status_bar_dynamic_sig(StatusBarInfoDynamic{y, x, r, g, b});
 }
 
 void Backend::show_performance_info(QString time_taken)
 {
-    emit performance_info_requested_sig("Function took: " + time_taken);
+    QString perf_info = "Function took: " + time_taken;
+    emit performance_info_requested_sig(perf_info);
 }
 
 void Backend::set_active_snapshot(int idx)
