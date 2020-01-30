@@ -19,9 +19,9 @@ struct Arg{
 struct Command{
     std::string command;
     std::vector<Arg> args;
-    bool no_arguments_allowed;
+    bool null_argument_callable;
     std::vector<type> valid_types;
-    int num_arguments;
+    int max_argument_count;
     std::string help_text;
 };
 #endif // COMMAND_H
