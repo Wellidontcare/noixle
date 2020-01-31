@@ -82,6 +82,11 @@ private:
     void populate_function_lut();
     void backup();
     QString image_format();
+    void set_args(const std::vector<Arg>& args);
+    Arg construct_arg(int arg);
+    Arg construct_arg(double arg);
+    Arg construct_arg(std::string arg);
+    Arg construct_arg(QString arg);
 };
 
 #endif // BACKEND_H

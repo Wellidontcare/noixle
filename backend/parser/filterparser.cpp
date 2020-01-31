@@ -29,7 +29,7 @@ cv::Mat FilterParser::parse_kernel(QString kernel_string)
             static_cast<int>
             (std::count_if(kernel_string.begin(),
                            kernel_string.end(),
-                           [](const QChar c){return c == ";" ? true : false;}));
+                           [](const QChar c){return c == ";";}));
     int width =
             static_cast<int>
             (std::count_if(kernel_string.begin(),
@@ -37,7 +37,7 @@ cv::Mat FilterParser::parse_kernel(QString kernel_string)
                            [](const QChar c){return c.isDigit();}) / height);
     cv::Mat kernel(width, height, CV_8U);
     auto kernel_ptr = kernel.ptr();
-    for(QChar c : kernel_string){
+    for(const QChar& c : kernel_string){
         if(c.isSpace() || c == ";")
             continue;
         if(c.isDigit())

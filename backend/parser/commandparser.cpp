@@ -18,10 +18,10 @@ Command CommandParser::parse(const char *input)
                          available_commands_.end(),
                          [command](const Command& command_){return command_.command == command;});
     if(available_command != available_commands_.end()){
-        int num_args_allowed = available_command->num_arguments;
-        int num_args = static_cast<int>(args.size());
-        if(num_args_allowed != num_args){
-            if(!(args.empty() && available_command->no_arguments_allowed)){
+        int max_arg_count = available_command->max_argument_count;
+        int current_arg_count = static_cast<int>(args.size());
+        if(max_arg_count != current_arg_count){
+            if(!(args.empty() && available_command->max_argument_count > 0)){
                 throw std::logic_error("Invalid number of arguments");
             }
         }

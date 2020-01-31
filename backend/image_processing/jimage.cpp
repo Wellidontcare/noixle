@@ -70,7 +70,6 @@ cv::Mat JImage::from_qimage(QImage image)
         return cv::Mat(image.height(), image.width(), CV_8UC1, image.bits());
     }
     throw std::logic_error("Invalid number of channels");
-    return cv::Mat();
 }
 
 unsigned char JImage::channel_val_at(int x, int y, color c)
@@ -79,18 +78,13 @@ unsigned char JImage::channel_val_at(int x, int y, color c)
         return this->at<unsigned char>(x, y);
     }
     else if(channels() == 3){
-        using Pixel = struct{
-        unsigned char b;
-        unsigned char g;
-        unsigned char r;
-    };
     switch (c) {
     case RED:
-        return this->at<Pixel>(x, y).r;
+        return (this->at<cv::Vec3b>(x, y))[2];
     case GREEN:
-        return this->at<Pixel>(x, y).g;
+        return (this->at<cv::Vec3b>(x, y))[1];
     case BLUE:
-        return this->at<Pixel>(x, y).b;
+        return (this->at<cv::Vec3b>(x, y))[0];
     }
 }
 throw std::logic_error("Wrong number of channels for this operation");
