@@ -29,6 +29,8 @@ FILE(GLOB NOIXLE_SRC
     frontend/widgets/snapshotwindow.ui
     frontend/widgets/statusbar.h
     frontend/widgets/statusbar.cpp
+    frontend/widgets/histogramviewer.cpp
+    frontend/widgets/histogramviewer.h
     backend/image_processing/imageprocessingcollection.h
     backend/image_processing/imageprocessingcollection.cpp
     backend/backend.cpp

@@ -15,7 +15,6 @@ class ZoomEnabledGraphicsView : public QGraphicsView
     MouseTrackerPixmapItem* image_item_ = nullptr;
 
 public:
-    ZoomEnabledGraphicsView();
     ZoomEnabledGraphicsView(QWidget* parent = nullptr);
     void resizeEvent(QResizeEvent *event) override;
 

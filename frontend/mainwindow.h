@@ -4,9 +4,11 @@
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QLabel>
-#include <backend/backend.h>
-#include <frontend/widgets/snapshotwindow.h>
-#include <frontend/widgets/statusbar.h>
+#include "backend/backend.h"
+#include "frontend/widgets/snapshotwindow.h"
+#include "frontend/widgets/statusbar.h"
+#include "frontend/widgets/histogramviewer.h"
+
 
 //!TODO implement history
 //!TODO implement histogramm [mode]
@@ -27,7 +29,9 @@ class MainWindow : public QMainWindow
 
     QStringList options_;
     Backend* backend_;
-    SnapshotWindow* snapshot_window_;
+    SnapshotViewer* snapshot_viewer_;
+    HistogramViewer* histogram_viewer_;
+
 
 public:
     MainWindow(QWidget *parent = nullptr);

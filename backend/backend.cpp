@@ -11,7 +11,6 @@ Backend::Backend(std::vector<Command> available_commands, QWidget* parent)
 void Backend::populate_function_lut()
 {
     function_lut_["open"] = &Backend::open_image;
-    function_lut_["invert"] = &Backend::invert;
     function_lut_["help"] = &Backend::help;
     function_lut_["exit"] = &Backend::exit;
     function_lut_["save"] = &Backend::save;
@@ -19,10 +18,12 @@ void Backend::populate_function_lut()
     function_lut_["record"] = &Backend::record;
     function_lut_["history"] = &Backend::history;
     function_lut_["load_macro"] = &Backend::load_macro;
-    function_lut_["filter"] = &Backend::filter;
     function_lut_["toggle_perf_meassurement"] = &Backend::toggle_meassure_perf;
     function_lut_["load_snapshot"] = &Backend::load_snapshot;
     function_lut_["revert"] = &Backend::revert;
+    function_lut_["histogram"] = &Backend::histogram;
+    function_lut_["imfilter"] = &Backend::filter;
+    function_lut_["iminvert"] = &Backend::invert;
 
 }
 
@@ -56,6 +57,11 @@ Arg Backend::construct_arg(std::string arg)
 Arg Backend::construct_arg(QString arg)
 {
     return {0, 0, arg.toStdString()};
+}
+
+bool Backend::is_revertable(QString command)
+{
+    return command.startsWith("im");
 }
 
 void Backend::update_view()
@@ -171,6 +177,9 @@ void Backend::snapshot()
 
 void Backend::record()
 {
+    if(data_.current_args.empty()){
+        throw std::logic_error("Record needs either start or stop arg");
+    }
     std::string record_arg = data_.current_args[0].string_arg;
     if(record_arg == "start"){
         data_.record_start_index = data_.command_history.size();
@@ -245,9 +254,18 @@ void Backend::revert()
     open_image();
 }
 
+void Backend::histogram()
+{
+    if(data_.current_args.empty()){
+        JImage hist;
+        ImageProcessingCollection::histogram(data_.active_image, hist);
+        emit histogram_updated_sig(hist.as_qimage());
+    }
+}
+
 void Backend::execute_command(QString command)
 {
-    if(command != "open" && command != "revert"){
+    if(is_revertable(command)){
         backup();
     }
     Command exec = parser_.parse(command.toStdString().c_str());
