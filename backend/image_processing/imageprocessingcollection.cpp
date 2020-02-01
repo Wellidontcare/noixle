@@ -1,11 +1,12 @@
 #include "imageprocessingcollection.h"
+namespace ImageProcessingCollection {
 
-JImage ImageProcessingCollection::open_image(std::string file_path)
+JImage open_image(std::string file_path)
 {
     return JImage(file_path);
 }
 
-void ImageProcessingCollection::invert_image(const JImage& in, JImage& out)
+void invert_image(const JImage& in, JImage& out)
 {
     out = in;
     if(out.empty()){
@@ -24,7 +25,7 @@ void ImageProcessingCollection::invert_image(const JImage& in, JImage& out)
     }
 }
 
-void ImageProcessingCollection::save_image(const JImage& in, std::string file_path)
+void save_image(const JImage& in, std::string file_path)
 {
     if(in.empty()){
         throw std::logic_error("Image is empty");
@@ -32,7 +33,7 @@ void ImageProcessingCollection::save_image(const JImage& in, std::string file_pa
     cv::imwrite(file_path, in);
 }
 
-void ImageProcessingCollection::histogram(const JImage &in, JImage &histogram, bool cumulative)
+void histogram(const JImage &in, JImage &histogram, bool cumulative)
 {
     if(in.type() == CV_8UC3){
         histogram_bgr_(in, histogram, cumulative);
@@ -44,7 +45,7 @@ void ImageProcessingCollection::histogram(const JImage &in, JImage &histogram, b
         else throw std::logic_error("Greyvalue histogram is not implemented yet");
 }
 
-static void histogram_bgr_(const JImage &in, JImage &histogram, bool cumulative)
+void histogram_bgr_(const JImage &in, JImage &histogram, bool cumulative)
 {
     std::vector<cv::Mat> channels;
     cv::split(in, channels);
@@ -107,7 +108,8 @@ void histogram_gray_(const JImage &in, JImage &histogram, bool cumulative)
     cv::flip(histogram, histogram, 0);
 }
 
-void ImageProcessingCollection::convert_color(const JImage &in, JImage &out, int color)
+void convert_color(const JImage &in, JImage &out, int color)
 {
     cv::cvtColor(in, out, color);
+}
 }

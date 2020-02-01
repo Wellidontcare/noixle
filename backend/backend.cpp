@@ -25,6 +25,7 @@ void Backend::populate_function_lut()
     function_lut_["imcconvert"] = &Backend::imcconvert;
     function_lut_["imfilter"] = &Backend::filter;
     function_lut_["iminvert"] = &Backend::iminvert;
+    function_lut_["imequalize"] = &Backend::imequalize;
 
 }
 
@@ -292,6 +293,40 @@ void Backend::imcconvert()
     ImageProcessingCollection::convert_color(data_.active_image, data_.active_image, color);
     emit image_updated_sig(data_.active_image.as_qimage());
     update_status_bar_on_load();
+}
+
+void Backend::imequalize()
+{
+    JImage& active_image = data_.active_image;
+    int width = active_image.rows;
+    int height = active_image.cols;
+    if(active_image.channels() == 3){
+        std::vector<cv::Mat> channels;
+        cv::split(active_image, channels);
+        std::vector<float> hist_b = ImageProcessingCollection::calc_hist_(channels[0], true);
+        std::vector<float> hist_g = ImageProcessingCollection::calc_hist_(channels[1], true);
+        std::vector<float> hist_r = ImageProcessingCollection::calc_hist_(channels[2], true);
+        for(int y = 0; y < height; ++y){
+            for(int x = 0; x < width; ++x){
+                cv::Vec3b pixel_val = active_image.at<cv::Vec3b>(x, y);
+                pixel_val[0] = hist_b[pixel_val[0]]*(255)/(width*height);
+                pixel_val[1] = hist_g[pixel_val[1]]*(255)/(width*height);
+                pixel_val[2] = hist_r[pixel_val[2]]*(255)/(width*height);
+                active_image.at<cv::Vec3b>(x, y) = pixel_val;
+            }
+        }
+    }
+    if(active_image.channels() == 1){
+        std::vector<float> hist = ImageProcessingCollection::calc_hist_(active_image, true);
+        for(int y = 0; y < height; ++y){
+            for(int x = 0; x < width; ++x){
+                unsigned char pixel_val = active_image.at<unsigned char>(x, y);
+                pixel_val = hist[pixel_val]*(255)/(width*height);
+                active_image.at<unsigned char>(x, y) = pixel_val;
+            }
+        }
+    }
+    update_view();
 }
 
 void Backend::execute_command(QString command)

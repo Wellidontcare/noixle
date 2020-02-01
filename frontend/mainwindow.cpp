@@ -9,8 +9,6 @@ MainWindow::MainWindow(QWidget *parent)
     ,histogram_viewer_(new HistogramViewer(this))
     ,ui(new Ui::MainWindow)
 {
-    setWindowIcon(QIcon(":/resources/noixle.png"));
-    setWindowTitle("Noixle");
     snapshot_viewer_->setWindowFlag(Qt::Window);
     ui->setupUi(this);
     ui->lineEdit->populate_options(options_);
@@ -66,7 +64,8 @@ std::vector<Command> MainWindow::add_available_commands()
         {"iminvert", {}, true, {}, 0, "inverts the currently opened image"},
         {"imfilter", {}, false, {STRING, INT}, 2, "['median' | 'gaussian' | 'binomial' | 'sobel' | 'dilate' | 'erode' | 'laplace'] size"},
         {"imcconvert", {}, false, {STRING}, 1, "[gray | color] converts the active image to the specified mode"},
-        {"histogram", {}, true, {STRING}, 1, "['cumulative'] Displays a histogram of the currently viewed image"}
+        {"histogram", {}, true, {STRING}, 1, "['cumulative'] Displays a histogram of the currently viewed image"},
+        {"imequalize", {}, true, {}, 0, "Improve the image contrast by equalizing the histogram"}
     };
     for(Command c : commands){
         options_.append(QString::fromStdString(c.command));

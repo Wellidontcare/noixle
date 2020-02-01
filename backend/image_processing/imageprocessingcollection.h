@@ -16,11 +16,11 @@ namespace ImageProcessingCollection{
     void save_image(const JImage& in, std::string file_path);
     void histogram(const JImage& in, JImage& histogram, bool cumulative = false);
     void convert_color(const JImage& in, JImage& out, int color);
+    void histogram_bgr_(const JImage& in, JImage& histogram, bool cumulative = false);
+    void histogram_gray_(const JImage& in, JImage& histogram, bool cumulative = false);
+    std::vector<float> calc_hist_(const JImage& channel, bool cumulative = false);
+    void draw_hist_(std::vector<float> hist, JImage& hist_image, const int channel);
 }
 
-static void histogram_bgr_(const JImage& in, JImage& histogram, bool cumulative = false);
-static void histogram_gray_(const JImage& in, JImage& histogram, bool cumulative = false);
-static std::vector<float> calc_hist_(const JImage& channel, bool cumulative = false);
-static void draw_hist_(std::vector<float> hist, JImage& hist_image, const int channel);
 
 #endif // IMAGEPROCESSINGCOLLECTION_H
