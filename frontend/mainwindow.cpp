@@ -63,6 +63,7 @@ std::vector<Command> MainWindow::add_available_commands()
         {"load_snapshot", {}, true, {INT}, 1, "Loads the selected snapshot"},
         {"iminvert", {}, true, {}, 0, "inverts the currently opened image"},
         {"imfilter", {}, false, {STRING, INT}, 2, "['median' | 'gaussian' | 'binomial' | 'sobel' | 'dilate' | 'erode' | 'laplace'] size"},
+        {"imcconvert", {}, false, {STRING}, 1, "[gray | color] converts the active image to the specified mode"},
         {"histogram", {}, true, {STRING}, 1, "['accumulate'] Displays a histogram of the currently viewed image"}
     };
     for(Command c : commands){

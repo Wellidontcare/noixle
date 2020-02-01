@@ -45,9 +45,9 @@ public:
     void update_view();
     void help();
     void exit();
-    void open_image();
+    void open();
     void load_snapshot();
-    void invert();
+    void iminvert();
     void save();
     void snapshot();
     void record();
@@ -58,6 +58,7 @@ public:
     bool meassure_perf();
     void revert();
     void histogram();
+    void imcconvert();
 
 public slots:
     void execute_command(QString command);
