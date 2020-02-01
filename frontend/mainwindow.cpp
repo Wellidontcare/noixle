@@ -9,6 +9,8 @@ MainWindow::MainWindow(QWidget *parent)
     ,histogram_viewer_(new HistogramViewer(this))
     ,ui(new Ui::MainWindow)
 {
+    setWindowIcon(QIcon(":/resources/noixle.png"));
+    setWindowTitle("Noixle");
     snapshot_viewer_->setWindowFlag(Qt::Window);
     ui->setupUi(this);
     ui->lineEdit->populate_options(options_);

@@ -47,6 +47,7 @@ FILE(GLOB NOIXLE_SRC
     backend/timer/timer.h
     backend/timer/timer.cpp
     frontend/mainwindow.ui
+    resources.qrc
 )
 
 add_executable(noixle ${NOIXLE_SRC})
