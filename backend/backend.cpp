@@ -263,12 +263,13 @@ void Backend::histogram()
         emit histogram_updated_sig(hist.as_qimage());
         return;
     }
-    if(data_.current_args[0].string_arg == "accumulate"){
+    if(data_.current_args[0].string_arg == "cumulative"){
         JImage hist;
         ImageProcessingCollection::histogram(data_.active_image, hist, true);
         emit histogram_updated_sig(hist.as_qimage());
         return;
     }
+    throw std::logic_error("Invalid argument");
 }
 
 void Backend::imcconvert()

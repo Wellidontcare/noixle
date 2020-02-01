@@ -64,7 +64,7 @@ std::vector<Command> MainWindow::add_available_commands()
         {"iminvert", {}, true, {}, 0, "inverts the currently opened image"},
         {"imfilter", {}, false, {STRING, INT}, 2, "['median' | 'gaussian' | 'binomial' | 'sobel' | 'dilate' | 'erode' | 'laplace'] size"},
         {"imcconvert", {}, false, {STRING}, 1, "[gray | color] converts the active image to the specified mode"},
-        {"histogram", {}, true, {STRING}, 1, "['accumulate'] Displays a histogram of the currently viewed image"}
+        {"histogram", {}, true, {STRING}, 1, "['cumulative'] Displays a histogram of the currently viewed image"}
     };
     for(Command c : commands){
         options_.append(QString::fromStdString(c.command));
