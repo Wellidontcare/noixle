@@ -18,7 +18,7 @@ void Backend::populate_function_lut()
     function_lut_["record"] = &Backend::record;
     function_lut_["history"] = &Backend::history;
     function_lut_["load_macro"] = &Backend::load_macro;
-    function_lut_["toggle_perf_meassurement"] = &Backend::toggle_meassure_perf;
+    function_lut_["toggle_perf_measurement"] = &Backend::toggle_measure_perf;
     function_lut_["load_snapshot"] = &Backend::load_snapshot;
     function_lut_["revert"] = &Backend::revert;
     function_lut_["histogram"] = &Backend::histogram;
@@ -75,14 +75,7 @@ void Backend::update_view()
 
 void Backend::help()
 {
-    QString help_text = "Available Commands:\n\n";
-    for(Command c : data_.available_commands){
-        help_text += c.command.c_str();
-        help_text += " -> ";
-        help_text += c.help_text.c_str();
-        help_text += '\n';
-    }
-    emit help_request_sig(help_text);
+    emit help_request_sig();
 }
 
 void Backend::exit()
@@ -236,7 +229,7 @@ void Backend::filter()
     FilterID id = FilterParser::parse(data_.current_args[0].string_arg.c_str());
 }
 
-void Backend::toggle_meassure_perf()
+void Backend::toggle_measure_perf()
 {
     data_.meassure_perf = ~data_.meassure_perf;
 }
