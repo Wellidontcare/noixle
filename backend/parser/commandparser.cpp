@@ -20,10 +20,12 @@ Command CommandParser::parse(const char *input)
     if(available_command != available_commands_.end()){
         int max_arg_count = available_command->max_argument_count;
         int current_arg_count = static_cast<int>(args.size());
-        if(max_arg_count != current_arg_count){
-            if(!(args.empty() && available_command->max_argument_count > 0)){
-                throw std::logic_error("Invalid number of arguments");
-            }
+        if(max_arg_count < current_arg_count && !(current_arg_count == 0 && available_command->null_argument_callable))
+        {
+            throw std::logic_error("Invalid number of arguments");
+        }
+        if(current_arg_count == 0 && !available_command->null_argument_callable){
+            throw std::logic_error("This command requires arguments");
         }
         if(has_correct_types(*available_command, args)){
             Command ret_command(*available_command);
