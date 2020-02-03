@@ -5,10 +5,11 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     ,options_()
     ,backend_(new Backend(add_available_commands(), parent))
-    ,snapshot_window_(new SnapshotWindow(this))
+    ,snapshot_viewer_(new SnapshotViewer(this))
+    ,histogram_viewer_(new HistogramViewer(this))
     ,ui(new Ui::MainWindow)
 {
-    snapshot_window_->setWindowFlag(Qt::Window);
+    snapshot_viewer_->setWindowFlag(Qt::Window);
     ui->setupUi(this);
     ui->lineEdit->populate_options(options_);
     connect(backend_, &Backend::image_updated_sig, ui->graphicsView, &ZoomEnabledGraphicsView::update_image);
@@ -18,10 +19,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(backend_, &Backend::update_status_bar_sig, ui->statusbar, &StatusBar::update_on_image_load);
     connect(backend_, &Backend::update_status_bar_dynamic_sig, ui->statusbar, &StatusBar::update_dynamic);
     connect(backend_, &Backend::exit_sig, qApp, &QApplication::closeAllWindows);
-    connect(backend_, &Backend::snapshot_taken_sig, snapshot_window_, &SnapshotWindow::add_snapshot);
+    connect(backend_, &Backend::snapshot_taken_sig, snapshot_viewer_, &SnapshotViewer::add_snapshot);
     connect(backend_, &Backend::history_requested_sig, ui->graphicsView, &ZoomEnabledGraphicsView::show_text);
     connect(backend_, &Backend::performance_info_requested_sig, this, &MainWindow::show_performance_info);
-    connect(snapshot_window_, &SnapshotWindow::currentChanged, backend_, &Backend::set_active_snapshot);
+    connect(snapshot_viewer_, &SnapshotViewer::currentChanged, backend_, &Backend::set_active_snapshot);
+    connect(backend_, &Backend::histogram_updated_sig, histogram_viewer_, &HistogramViewer::show_histogram);
 }
 MainWindow::~MainWindow()
 {
@@ -48,19 +50,22 @@ void MainWindow::show_performance_info(QString performance_info)
 std::vector<Command> MainWindow::add_available_commands()
 {
     std::vector<Command> commands = {
-        {"open", {}, true, {STRING}, 1, "[file_path (optional)] opens an image"},
-        {"invert", {}, true, {}, 0, "inverts the currently opened image"},
         {"help", {}, true, {}, 0, "shows this message"},
-        {"exit", {}, true, {}, 0, "exits the programm"},
+        {"open", {}, true, {STRING}, 1, "[file_path (optional)] opens an image"},
         {"save", {}, true, {}, 1, "[file_path (optional)] saves the currently opened image"},
-        {"snapshot", {}, true, {}, 0, "Saves the image as snapshot and displays it in a new tab-window"},
+        {"exit", {}, true, {}, 0, "exits the programm"},
+        {"revert", {}, true, {}, 0, "Reverts back to last state"},
+        {"toggle_perf_meassurement",{}, true, {}, 0, "Toggles the performance meassurement"},
         {"history", {}, true, {}, 0, "Shows the command history"},
         {"record", {}, false, {STRING}, 1, "[start | stop] starts or stops the command recording"},
         {"load_macro", {}, true, {STRING}, 1, "Loads and plays a recorded macro"},
+        {"snapshot", {}, true, {}, 0, "Saves the image as snapshot and displays it in a new tab-window"},
         {"load_snapshot", {}, true, {INT}, 1, "Loads the selected snapshot"},
-        {"filter", {}, false, {STRING, INT}, 2, "['median' | 'gaussian' | 'binomial' | 'sobel' | 'dilate' | 'erode' | 'laplace' size"},
-        {"toggle_perf_meassurement",{}, true, {}, 0, "Toggles the performance meassurement"},
-        {"revert", {}, true, {}, 0, "Reverts back to last state"}
+        {"iminvert", {}, true, {}, 0, "inverts the currently opened image"},
+        {"imfilter", {}, false, {STRING, INT}, 2, "['median' | 'gaussian' | 'binomial' | 'sobel' | 'dilate' | 'erode' | 'laplace'] size"},
+        {"imcconvert", {}, false, {STRING}, 1, "[gray | color] converts the active image to the specified mode"},
+        {"histogram", {}, true, {STRING}, 1, "['cumulative'] Displays a histogram of the currently viewed image"},
+        {"imequalize", {}, true, {}, 0, "Improve the image contrast by equalizing the histogram"}
     };
     for(Command c : commands){
         options_.append(QString::fromStdString(c.command));

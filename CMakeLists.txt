@@ -29,6 +29,8 @@ FILE(GLOB NOIXLE_SRC
     frontend/widgets/snapshotwindow.ui
     frontend/widgets/statusbar.h
     frontend/widgets/statusbar.cpp
+    frontend/widgets/histogramviewer.cpp
+    frontend/widgets/histogramviewer.h
     backend/image_processing/imageprocessingcollection.h
     backend/image_processing/imageprocessingcollection.cpp
     backend/backend.cpp
@@ -45,6 +47,7 @@ FILE(GLOB NOIXLE_SRC
     backend/timer/timer.h
     backend/timer/timer.cpp
     frontend/mainwindow.ui
+    resources.qrc
 )
 
 add_executable(noixle ${NOIXLE_SRC})

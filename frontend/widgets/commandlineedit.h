@@ -15,6 +15,7 @@ class CommandLineEdit : public QLineEdit{
     QStringList available_options;
     QCompleter* completer;
 
+
 public:
     CommandLineEdit(QWidget* parent = nullptr);
     void keyPressEvent(QKeyEvent *) override;

@@ -1,7 +1,7 @@
 #include "snapshotwindow.h"
 #include "ui_snapshotwindow.h"
 
-SnapshotWindow::SnapshotWindow(QWidget *parent) :
+SnapshotViewer::SnapshotViewer(QWidget *parent) :
     QTabWidget(parent),
     ui(new Ui::SnapshotWindow)
 {
@@ -9,7 +9,7 @@ SnapshotWindow::SnapshotWindow(QWidget *parent) :
     setTabsClosable(false);
 }
 
-SnapshotWindow::~SnapshotWindow()
+SnapshotViewer::~SnapshotViewer()
 {
     delete ui;
     for(auto view : views_){
@@ -17,7 +17,7 @@ SnapshotWindow::~SnapshotWindow()
     }
 }
 
-void SnapshotWindow::add_snapshot(JImage image)
+void SnapshotViewer::add_snapshot(JImage image)
 {
     auto view = new ZoomEnabledGraphicsView(this);
     addTab(view, image.get_file_path().c_str());

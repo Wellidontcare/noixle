@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/noixle.png</file>
+    </qresource>
+</RCC>

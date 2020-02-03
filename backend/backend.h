@@ -45,9 +45,9 @@ public:
     void update_view();
     void help();
     void exit();
-    void open_image();
+    void open();
     void load_snapshot();
-    void invert();
+    void iminvert();
     void save();
     void snapshot();
     void record();
@@ -57,6 +57,9 @@ public:
     void toggle_meassure_perf();
     bool meassure_perf();
     void revert();
+    void histogram();
+    void imcconvert();
+    void imequalize();
 
 public slots:
     void execute_command(QString command);
@@ -75,6 +78,7 @@ signals:
     void snapshot_taken_sig(JImage);
     void history_requested_sig(QString);
     void performance_info_requested_sig(QString);
+    void histogram_updated_sig(QImage);
 
 private:
     void save_to_history(QString command, QString args);
@@ -87,6 +91,7 @@ private:
     Arg construct_arg(double arg);
     Arg construct_arg(std::string arg);
     Arg construct_arg(QString arg);
+    bool is_revertable(QString command);
 };
 
 #endif // BACKEND_H

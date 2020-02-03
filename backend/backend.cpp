@@ -10,8 +10,7 @@ Backend::Backend(std::vector<Command> available_commands, QWidget* parent)
 
 void Backend::populate_function_lut()
 {
-    function_lut_["open"] = &Backend::open_image;
-    function_lut_["invert"] = &Backend::invert;
+    function_lut_["open"] = &Backend::open;
     function_lut_["help"] = &Backend::help;
     function_lut_["exit"] = &Backend::exit;
     function_lut_["save"] = &Backend::save;
@@ -19,10 +18,14 @@ void Backend::populate_function_lut()
     function_lut_["record"] = &Backend::record;
     function_lut_["history"] = &Backend::history;
     function_lut_["load_macro"] = &Backend::load_macro;
-    function_lut_["filter"] = &Backend::filter;
     function_lut_["toggle_perf_meassurement"] = &Backend::toggle_meassure_perf;
     function_lut_["load_snapshot"] = &Backend::load_snapshot;
     function_lut_["revert"] = &Backend::revert;
+    function_lut_["histogram"] = &Backend::histogram;
+    function_lut_["imcconvert"] = &Backend::imcconvert;
+    function_lut_["imfilter"] = &Backend::filter;
+    function_lut_["iminvert"] = &Backend::iminvert;
+    function_lut_["imequalize"] = &Backend::imequalize;
 
 }
 
@@ -58,6 +61,11 @@ Arg Backend::construct_arg(QString arg)
     return {0, 0, arg.toStdString()};
 }
 
+bool Backend::is_revertable(QString command)
+{
+    return command.startsWith("im");
+}
+
 void Backend::update_view()
 {
     if(data_.active_image.empty())
@@ -82,7 +90,7 @@ void Backend::exit()
     emit exit_sig();
 }
 
-void Backend::open_image()
+void Backend::open()
 {
     QString open_file_path;
     if(data_.current_args.empty())
@@ -120,18 +128,18 @@ void Backend::load_snapshot()
             throw std::logic_error("Can't load snapshot");
         }
         set_args({construct_arg(snaphot_img_path)});
-        open_image();
+        open();
     }
     else{
         int snapshot_idx = data_.current_args[0].int_arg;
         QString snapshot_img_path = tmp_file_path + "/Snapshot" + QString::number(snapshot_idx) + ".tif";
         set_args({construct_arg(snapshot_img_path)});
-        open_image();
+        open();
     }
 
 }
 
-void Backend::invert()
+void Backend::iminvert()
 {
     {
     TIME_THIS
@@ -171,6 +179,9 @@ void Backend::snapshot()
 
 void Backend::record()
 {
+    if(data_.current_args.empty()){
+        throw std::logic_error("Record needs either start or stop arg");
+    }
     std::string record_arg = data_.current_args[0].string_arg;
     if(record_arg == "start"){
         data_.record_start_index = data_.command_history.size();
@@ -221,7 +232,7 @@ void Backend::load_macro()
 }
 
 void Backend::filter()
-{
+{   TIME_THIS
     FilterID id = FilterParser::parse(data_.current_args[0].string_arg.c_str());
 }
 
@@ -242,12 +253,67 @@ void Backend::revert()
     if(!QFile(backup_img_file_path).exists())
         throw std::logic_error("Revert not possible");
     set_args({construct_arg(backup_img_file_path)});
-    open_image();
+    open();
+}
+
+void Backend::histogram()
+{
+    {
+    TIME_THIS
+    if(data_.current_args.empty()){
+        JImage hist;
+        ImageProcessingCollection::histogram(data_.active_image, hist);
+        emit histogram_updated_sig(hist.as_qimage());
+        return;
+    }
+    if(data_.current_args[0].string_arg == "cumulative"){
+        JImage hist;
+        ImageProcessingCollection::histogram(data_.active_image, hist, true);
+        emit histogram_updated_sig(hist.as_qimage());
+        return;
+    }
+    }
+    throw std::logic_error("Invalid argument");
+}
+
+void Backend::imcconvert()
+{
+    int color = cv::COLOR_RGB2BGR;
+    if(data_.current_args[0].string_arg == "color"){
+        if(data_.active_image.channels() == 3)
+            throw std::logic_error("Image is already in color mode");
+        color = cv::COLOR_GRAY2BGR;
+    }
+    else if(data_.current_args[0].string_arg == "gray"){
+        if(data_.active_image.channels() == 1){
+            throw std::logic_error("Image is already in grayscale mode");
+        }
+        color = cv::COLOR_BGR2GRAY;
+    }
+    else{
+        throw std::logic_error("Invalid conversion code");
+    }
+    {
+    TIME_THIS
+    ImageProcessingCollection::convert_color(data_.active_image, data_.active_image, color);
+    }
+    emit image_updated_sig(data_.active_image.as_qimage());
+    update_status_bar_on_load();
+}
+
+void Backend::imequalize()
+{
+    JImage& active_image = data_.active_image;
+    {
+    TIME_THIS
+    ImageProcessingCollection::equalize(active_image, active_image);
+    }
+    update_view();
 }
 
 void Backend::execute_command(QString command)
 {
-    if(command != "open" && command != "revert"){
+    if(is_revertable(command)){
         backup();
     }
     Command exec = parser_.parse(command.toStdString().c_str());

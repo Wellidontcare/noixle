@@ -1,11 +1,5 @@
 #include "zoomenabledgraphicsview.h"
 
-ZoomEnabledGraphicsView::ZoomEnabledGraphicsView()
-{
-    setMouseTracking(true);
-    setScene(&scene_);
-}
-
 ZoomEnabledGraphicsView::ZoomEnabledGraphicsView(QWidget *parent)
     : QGraphicsView(parent)
 {
