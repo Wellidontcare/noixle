@@ -60,6 +60,7 @@ public:
     void histogram();
     void imcconvert();
     void imequalize();
+    void imgammacorrect();
 
 public slots:
     void execute_command(QString command);

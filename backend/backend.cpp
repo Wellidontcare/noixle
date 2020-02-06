@@ -26,6 +26,7 @@ void Backend::populate_function_lut()
     function_lut_["imfilter"] = &Backend::filter;
     function_lut_["iminvert"] = &Backend::iminvert;
     function_lut_["imequalize"] = &Backend::imequalize;
+    function_lut_["imgammacorrect"] = &Backend::imgammacorrect;
 
 }
 
@@ -231,7 +232,7 @@ void Backend::filter()
 
 void Backend::toggle_measure_perf()
 {
-    data_.meassure_perf = ~data_.meassure_perf;
+    data_.meassure_perf = !data_.meassure_perf;
 }
 
 bool Backend::meassure_perf()
@@ -302,6 +303,11 @@ void Backend::imequalize()
     ImageProcessingCollection::equalize(active_image, active_image);
     }
     update_view();
+}
+
+void Backend::imgammacorrect()
+{
+
 }
 
 void Backend::execute_command(QString command)

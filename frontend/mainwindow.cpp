@@ -66,7 +66,8 @@ std::vector<Command> MainWindow::add_available_commands()
         {"imfilter", {}, false, {STRING, INT}, 2, "['median' | 'gaussian' | 'binomial' | 'sobel' | 'dilate' | 'erode' | 'laplace'] size | applies filter kernel to current image"},
         {"imcconvert", {}, false, {STRING}, 1, "[gray | color] | converts the active image to the specified mode"},
         {"histogram", {}, true, {STRING}, 1, "['cumulative'] | displays a histogram of the currently viewed image"},
-        {"imequalize", {}, true, {}, 0, "| improves the image contrast by equalizing the histogram"}
+        {"imequalize", {}, true, {}, 0, "| improves the image contrast by equalizing the histogram"},
+        {"imgammacorrect", {}, false, {}, 0, "| corrects the gamme by the specified value"}
     };
     for(Command c : commands){
         options_.append(QString::fromStdString(c.command));
