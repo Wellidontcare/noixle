@@ -61,6 +61,7 @@ public:
     void imcconvert();
     void imequalize();
     void imgammacorrect();
+    void imbinarize();
 
 public slots:
     void execute_command(QString command);
@@ -80,6 +81,8 @@ signals:
     void history_requested_sig(QString);
     void performance_info_requested_sig(QString);
     void histogram_updated_sig(QImage);
+    void show_threshold_sig(int);
+    void binarize_wizard_sig(JImage);
 
 private:
     void save_to_history(QString command, QString args);

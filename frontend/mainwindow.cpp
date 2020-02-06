@@ -8,6 +8,7 @@ MainWindow::MainWindow(QWidget *parent)
     ,backend_(new Backend(add_available_commands(), parent))
     ,snapshot_viewer_(new SnapshotViewer(this))
     ,histogram_viewer_(new HistogramViewer(this))
+    ,binarize_window_(new BinarizeWindow(this))
     ,ui(new Ui::MainWindow)
 {
     snapshot_viewer_->setWindowFlag(Qt::Window);
@@ -25,6 +26,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(backend_, &Backend::performance_info_requested_sig, this, &MainWindow::show_performance_info);
     connect(snapshot_viewer_, &SnapshotViewer::currentChanged, backend_, &Backend::set_active_snapshot);
     connect(backend_, &Backend::histogram_updated_sig, histogram_viewer_, &HistogramViewer::show_histogram);
+    connect(backend_, &Backend::binarize_wizard_sig, binarize_window_, &BinarizeWindow::show_binarize_wizard);
+    connect(binarize_window_, &BinarizeWindow::thresh_hist_sig, histogram_viewer_, &HistogramViewer::show_histogram);
 }
 MainWindow::~MainWindow()
 {
@@ -67,7 +70,8 @@ std::vector<Command> MainWindow::add_available_commands()
         {"imcconvert", {}, false, {STRING}, 1, "[gray | color] | converts the active image to the specified mode"},
         {"histogram", {}, true, {STRING}, 1, "['cumulative'] | displays a histogram of the currently viewed image"},
         {"imequalize", {}, true, {}, 0, "| improves the image contrast by equalizing the histogram"},
-        {"imgammacorrect", {}, false, {}, 0, "| corrects the gamme by the specified value"}
+        {"imgammacorrect", {}, false, {FLOAT}, 1, "| corrects the gamme by the specified value"},
+        {"imbinarize", {}, true, {INT}, 1, "[threshold] | binarizes an image"}
     };
     for(Command c : commands){
         options_.append(QString::fromStdString(c.command));

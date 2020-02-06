@@ -8,7 +8,7 @@ JImage open_image(std::string file_path)
 
 void invert_image(const JImage& in, JImage& out)
 {
-    out = in;
+    out = in.clone();
     if(out.empty()){
         throw std::logic_error("Not a valid image");
     }
@@ -37,12 +37,12 @@ void histogram(const JImage &in, JImage &histogram, bool cumulative)
 {
     if(in.type() == CV_8UC3){
         histogram_bgr(in, histogram, cumulative);
-     }
+    }
     else if(in.type() == CV_8UC1){
         histogram_gray(in, histogram, cumulative);
     }
 
-        else throw std::logic_error("Greyvalue histogram is not implemented yet");
+    else throw std::logic_error("Greyvalue histogram is not implemented yet");
 }
 
 void histogram_bgr(const JImage &in, JImage &histogram, bool cumulative)
@@ -90,8 +90,8 @@ void draw_hist(std::vector<float> hist, JImage &hist_image, const int channel)
     for(int x = 0; x < hist_image.cols; ++x){
         for(int h = 0; h < cvRound(hist[static_cast<size_t>(x)]); ++h){
             (hist_image.at<cv::Vec3b>(h, x))[channel] += 250;
+        }
     }
-}
 }
 
 void histogram_gray(const JImage &in, JImage &histogram, bool cumulative)
@@ -115,7 +115,7 @@ void convert_color(const JImage &in, JImage &out, int color)
 
 void equalize(const JImage &in, JImage &out)
 {
-    out = in;
+    out = in.clone();
     int width = out.rows;
     int height = out.cols;
     if(out.channels() == 3){
@@ -144,6 +144,38 @@ void equalize(const JImage &in, JImage &out)
             }
         }
     }
+}
+
+void gamma_correct(const JImage &in, JImage &out, const float gamma_val)
+{
+    out = in.clone();
+    if(out.channels() == 3){
+        out.forEach<cv::Vec3b>([gamma_val](cv::Vec3b& pixel, const int* position){pixel[0] = cv::pow((static_cast<double>(pixel[0])/255), 1/gamma_val)*255;
+                                                                                  pixel[1] = cv::pow((static_cast<double>(pixel[1])/255), 1/gamma_val)*255;
+                                                                                  pixel[2] = cv::pow((static_cast<double>(pixel[2])/255), 1/gamma_val)*255;
+                                                                                 });
+    }
+    if(out.channels() == 1){
+        out.forEach<unsigned char>([gamma_val](unsigned char& pixel, const int* position){pixel = cv::pow((static_cast<double>(pixel)/255), gamma_val)*255;});
+    }
+}
+
+void binarize(const JImage& in, JImage &out, const int threshold)
+{
+    if(in.channels() != 1){
+        throw std::logic_error("Image has to be grayscale!");
+    }
+    out = in.clone();
+    out.forEach<unsigned char>([threshold](unsigned char& pixel, const int* position){
+        pixel = pixel >= threshold ? 0 : 255;
+    });
+}
+
+void histogram_gray_thresh(const JImage &in, JImage &histogram, const int threshold)
+{
+    histogram_gray(in, histogram);
+    int channels = histogram.channels();
+    cv::line(histogram, {threshold, 0}, {threshold, 250},{0, 0, 255});
 }
 
 }

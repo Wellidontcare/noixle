@@ -27,6 +27,7 @@ void Backend::populate_function_lut()
     function_lut_["iminvert"] = &Backend::iminvert;
     function_lut_["imequalize"] = &Backend::imequalize;
     function_lut_["imgammacorrect"] = &Backend::imgammacorrect;
+    function_lut_["imbinarize"] = &Backend::imbinarize;
 
 }
 
@@ -307,7 +308,31 @@ void Backend::imequalize()
 
 void Backend::imgammacorrect()
 {
+    JImage& active_image = data_.active_image;
+    {
+        TIME_THIS
+        ImageProcessingCollection::gamma_correct(active_image, active_image, data_.current_args[0].float_arg);
+    }
+    update_view();
+}
 
+void Backend::imbinarize()
+{
+    if(data_.current_args.empty()){
+        emit binarize_wizard_sig(data_.active_image);
+        return;
+    }
+    JImage& active_image = data_.active_image;
+    int threshold = data_.current_args[0].int_arg;
+    if(active_image.channels() != 1){
+        ImageProcessingCollection::convert_color(active_image, active_image, cv::COLOR_BGR2GRAY);
+    }
+    {
+    TIME_THIS
+    ImageProcessingCollection::binarize(active_image, active_image, threshold);
+    }
+    emit show_threshold_sig(threshold);
+    update_view();
 }
 
 void Backend::execute_command(QString command)

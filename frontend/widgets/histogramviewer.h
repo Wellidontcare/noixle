@@ -12,13 +12,11 @@ class HistogramViewer : public QWidget
     ZoomEnabledGraphicsView* view_;
     QVBoxLayout* layout_;
 
-
 public:
     explicit HistogramViewer(QWidget *parent = nullptr);
 
 public slots:
     void show_histogram(QImage hist);
-signals:
 
 };
 

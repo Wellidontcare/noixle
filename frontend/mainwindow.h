@@ -11,6 +11,7 @@
 #include "frontend/widgets/statusbar.h"
 #include "frontend/widgets/histogramviewer.h"
 #include "frontend/widgets/helpwindow.h"
+#include "frontend/widgets/binarizewindow.h"
 
 
 //!TODO implement history
@@ -36,6 +37,7 @@ class MainWindow : public QMainWindow
     Backend* backend_;
     SnapshotViewer* snapshot_viewer_;
     HistogramViewer* histogram_viewer_;
+    BinarizeWindow* binarize_window_;
 
 
 public:
