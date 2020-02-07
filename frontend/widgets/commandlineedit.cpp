@@ -42,7 +42,7 @@ bool CommandLineEdit::event(QEvent *event){
 void CommandLineEdit::populate_options(QStringList list)
 {
     available_options = list;
-    completer = new QCompleter(available_options);
+    completer = new QCompleter(available_options, this);
     setCompleter(completer);
 }
 

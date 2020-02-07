@@ -18,7 +18,7 @@ void Backend::populate_function_lut()
     function_lut_["record"] = &Backend::record;
     function_lut_["history"] = &Backend::history;
     function_lut_["load_macro"] = &Backend::load_macro;
-    function_lut_["toggle_perf_meassurement"] = &Backend::toggle_meassure_perf;
+    function_lut_["toggle_perf_measurement"] = &Backend::toggle_measure_perf;
     function_lut_["load_snapshot"] = &Backend::load_snapshot;
     function_lut_["revert"] = &Backend::revert;
     function_lut_["histogram"] = &Backend::histogram;
@@ -26,6 +26,8 @@ void Backend::populate_function_lut()
     function_lut_["imfilter"] = &Backend::filter;
     function_lut_["iminvert"] = &Backend::iminvert;
     function_lut_["imequalize"] = &Backend::imequalize;
+    function_lut_["imgammacorrect"] = &Backend::imgammacorrect;
+    function_lut_["imbinarize"] = &Backend::imbinarize;
 
 }
 
@@ -75,14 +77,7 @@ void Backend::update_view()
 
 void Backend::help()
 {
-    QString help_text = "Available Commands:\n\n";
-    for(Command c : data_.available_commands){
-        help_text += c.command.c_str();
-        help_text += " -> ";
-        help_text += c.help_text.c_str();
-        help_text += '\n';
-    }
-    emit help_request_sig(help_text);
+    emit help_request_sig();
 }
 
 void Backend::exit()
@@ -236,9 +231,9 @@ void Backend::filter()
     FilterID id = FilterParser::parse(data_.current_args[0].string_arg.c_str());
 }
 
-void Backend::toggle_meassure_perf()
+void Backend::toggle_measure_perf()
 {
-    data_.meassure_perf = ~data_.meassure_perf;
+    data_.meassure_perf = !data_.meassure_perf;
 }
 
 bool Backend::meassure_perf()
@@ -308,6 +303,35 @@ void Backend::imequalize()
     TIME_THIS
     ImageProcessingCollection::equalize(active_image, active_image);
     }
+    update_view();
+}
+
+void Backend::imgammacorrect()
+{
+    JImage& active_image = data_.active_image;
+    {
+        TIME_THIS
+        ImageProcessingCollection::gamma_correct(active_image, active_image, data_.current_args[0].float_arg);
+    }
+    update_view();
+}
+
+void Backend::imbinarize()
+{
+    if(data_.current_args.empty()){
+        emit binarize_wizard_sig(data_.active_image);
+        return;
+    }
+    JImage& active_image = data_.active_image;
+    int threshold = data_.current_args[0].int_arg;
+    if(active_image.channels() != 1){
+        ImageProcessingCollection::convert_color(active_image, active_image, cv::COLOR_BGR2GRAY);
+    }
+    {
+    TIME_THIS
+    ImageProcessingCollection::binarize(active_image, active_image, threshold);
+    }
+    emit show_threshold_sig(threshold);
     update_view();
 }
 

@@ -2,12 +2,12 @@
 
 StatusBar::StatusBar(QWidget *parent)
     : QStatusBar (parent)
-    ,pos_label_(new QLabel("0 0"))
-    ,rgb_label_(new QLabel("0 0 0"))
-    ,format_label_(new QLabel("None"))
-    ,file_path_label_(new QLabel("No image loaded"))
-    ,dimensions_label_(new QLabel("0x0"))
-    ,spacer_(new QLabel(" | "))
+    ,pos_label_(new QLabel("0 0", this))
+    ,rgb_label_(new QLabel("0 0 0", this))
+    ,format_label_(new QLabel("None", this))
+    ,file_path_label_(new QLabel("No image loaded", this))
+    ,dimensions_label_(new QLabel("0x0", this))
+    ,spacer_(new QLabel(" | ", this))
 {
     addWidget(pos_label_);
     addWidget(spacer_);
@@ -19,14 +19,7 @@ StatusBar::StatusBar(QWidget *parent)
 }
 
 StatusBar::~StatusBar()
-{
-    delete pos_label_;
-    delete rgb_label_;
-    delete format_label_;
-    delete  file_path_label_;
-    delete dimensions_label_;
-    delete spacer_;
-}
+{}
 
 void StatusBar::update_dynamic(StatusBarInfoDynamic info)
 {

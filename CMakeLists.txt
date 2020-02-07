@@ -47,6 +47,12 @@ FILE(GLOB NOIXLE_SRC
     backend/timer/timer.h
     backend/timer/timer.cpp
     frontend/mainwindow.ui
+    frontend/widgets/helpwindow.h
+    frontend/widgets/helpwindow.cpp
+    frontend/widgets/helpwindow.ui
+    frontend/widgets/binarizewindow.cpp
+    frontend/widgets/binarizewindow.h
+    frontend/widgets/binarizewindow.ui
     resources.qrc
 )
 

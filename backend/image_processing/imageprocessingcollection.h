@@ -18,9 +18,12 @@ namespace ImageProcessingCollection{
     void convert_color(const JImage& in, JImage& out, int color);
     void histogram_bgr(const JImage& in, JImage& histogram, bool cumulative = false);
     void histogram_gray(const JImage& in, JImage& histogram, bool cumulative = false);
+    void histogram_gray_thresh(const JImage& in, JImage& histogram, const int threshold);
     std::vector<float> calc_hist(const JImage& channel, bool cumulative = false);
     void equalize(const JImage& in, JImage& out);
     void draw_hist(std::vector<float> hist, JImage& hist_image, const int channel);
+    void gamma_correct(const JImage& in, JImage& out, const float gamma_val);
+    void binarize(const JImage& in, JImage& out, const int threshold);
 }
 
 

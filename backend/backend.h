@@ -54,12 +54,14 @@ public:
     void history();
     void load_macro();
     void filter();
-    void toggle_meassure_perf();
+    void toggle_measure_perf();
     bool meassure_perf();
     void revert();
     void histogram();
     void imcconvert();
     void imequalize();
+    void imgammacorrect();
+    void imbinarize();
 
 public slots:
     void execute_command(QString command);
@@ -70,7 +72,7 @@ public slots:
 
 
 signals:
-    void help_request_sig(QString);
+    void help_request_sig();
     void image_updated_sig(QImage);
     void exit_sig();
     void update_status_bar_sig(StatusBarInfoStatic);
@@ -79,6 +81,8 @@ signals:
     void history_requested_sig(QString);
     void performance_info_requested_sig(QString);
     void histogram_updated_sig(QImage);
+    void show_threshold_sig(int);
+    void binarize_wizard_sig(JImage);
 
 private:
     void save_to_history(QString command, QString args);

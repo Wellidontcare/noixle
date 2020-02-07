@@ -4,10 +4,14 @@
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QLabel>
+#include <QStringListModel>
+
 #include "backend/backend.h"
 #include "frontend/widgets/snapshotwindow.h"
 #include "frontend/widgets/statusbar.h"
 #include "frontend/widgets/histogramviewer.h"
+#include "frontend/widgets/helpwindow.h"
+#include "frontend/widgets/binarizewindow.h"
 
 
 //!TODO implement history
@@ -27,10 +31,13 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+    HelpWindow* help_window_;
     QStringList options_;
+    QStringList help_text_;
     Backend* backend_;
     SnapshotViewer* snapshot_viewer_;
     HistogramViewer* histogram_viewer_;
+    BinarizeWindow* binarize_window_;
 
 
 public:
@@ -42,5 +49,9 @@ public:
 private:
     Ui::MainWindow *ui;
     std::vector<Command> add_available_commands();
+
+    // QWidget interface
+protected:
+    void keyPressEvent(QKeyEvent *event);
 };
 #endif // MAINWINDOW_H

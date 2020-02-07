@@ -12,9 +12,6 @@ SnapshotViewer::SnapshotViewer(QWidget *parent) :
 SnapshotViewer::~SnapshotViewer()
 {
     delete ui;
-    for(auto view : views_){
-        delete view;
-    }
 }
 
 void SnapshotViewer::add_snapshot(JImage image)
