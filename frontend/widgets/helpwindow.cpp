@@ -6,6 +6,7 @@ HelpWindow::HelpWindow(QWidget *parent) :
     help_text_(nullptr),
     ui(new Ui::HelpWindow)
 {
+    setWindowFlag(Qt::Window);
     ui->setupUi(this);
     ui->listView->setEditTriggers(QAbstractItemView::EditTrigger::NoEditTriggers);
 }
@@ -16,7 +17,7 @@ void HelpWindow::add_help_text(QStringList text)
         delete help_text_;
         help_text_ = nullptr;
     }
-    help_text_ = new QStringListModel(text);
+    help_text_ = new QStringListModel(text, this);
     ui->listView->setModel(help_text_);
 }
 

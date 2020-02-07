@@ -3,7 +3,7 @@
 HistogramViewer::HistogramViewer(QWidget *parent)
     : QWidget(parent),
       view_(new ZoomEnabledGraphicsView),
-      layout_(new QVBoxLayout)
+      layout_(new QVBoxLayout(this))
 {
     setWindowFlag(Qt::Window);
     setWindowTitle("Histogram");

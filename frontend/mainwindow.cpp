@@ -3,7 +3,7 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    ,help_window_(new HelpWindow)
+    ,help_window_(new HelpWindow(this))
     ,options_()
     ,backend_(new Backend(add_available_commands(), parent))
     ,snapshot_viewer_(new SnapshotViewer(this))
