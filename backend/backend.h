@@ -62,6 +62,7 @@ public:
     void imequalize();
     void imgammacorrect();
     void imbinarize();
+    void imrotate();
 
 public slots:
     void execute_command(QString command);

@@ -13,7 +13,7 @@ void invert_image(const JImage& in, JImage& out)
         throw std::logic_error("Not a valid image");
     }
     if(out.channels() == 3){
-        using Pixel = cv::Point3_<uint8_t>;
+        using Pixel = cv::Point3_<unsigned char>;
         out.forEach<Pixel>([](Pixel& pixel, const int* position){pixel.x = ~pixel.x;
                                                                  pixel.y = ~pixel.y;
                                                                                                                       pixel.z = ~pixel.z;});
@@ -176,6 +176,20 @@ void histogram_gray_thresh(const JImage &in, JImage &histogram, const int thresh
     histogram_gray(in, histogram);
     int channels = histogram.channels();
     cv::line(histogram, {threshold, 0}, {threshold, 250},{0, 0, 255});
+}
+
+void rotate(const JImage &in, JImage &out, const int angle)
+{
+    int width = in.cols;
+    int height = in.rows;
+
+    int c_x = width / 2;
+    int c_y = height / 2;
+    cv::Mat rotation_matrix = cv::getRotationMatrix2D(cv::Point{c_x, c_y}, angle, 1.0);
+
+    cv::Mat rotated = cv::Mat::zeros(in.rows, in.cols, in.type());
+    cv::warpAffine(in, rotated, rotation_matrix, rotated.size());
+    out = rotated;
 }
 
 }

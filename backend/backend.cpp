@@ -28,6 +28,7 @@ void Backend::populate_function_lut()
     function_lut_["imequalize"] = &Backend::imequalize;
     function_lut_["imgammacorrect"] = &Backend::imgammacorrect;
     function_lut_["imbinarize"] = &Backend::imbinarize;
+    function_lut_["imrotate"] = &Backend::imrotate;
 
 }
 
@@ -332,6 +333,14 @@ void Backend::imbinarize()
     ImageProcessingCollection::binarize(active_image, active_image, threshold);
     }
     emit show_threshold_sig(threshold);
+    update_view();
+}
+
+void Backend::imrotate()
+{
+    int angle = data_.current_args[0].int_arg;
+    JImage& image = data_.active_image;
+    ImageProcessingCollection::rotate(image, image, angle);
     update_view();
 }
 
