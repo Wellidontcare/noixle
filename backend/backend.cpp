@@ -31,6 +31,7 @@ void Backend::populate_function_lut()
     function_lut_["imrotate"] = &Backend::imrotate;
     function_lut_["impixelize"] = &Backend::impixelize;
     function_lut_["imshadingcorrect"] = &Backend::imshadingcorrect;
+    function_lut_["imintegral"] = &Backend::imintegral;
 
 }
 
@@ -351,7 +352,31 @@ void Backend::impixelize()
 {
     JImage& active_image = data_.active_image;
     int& pixel_size = data_.current_args[0].int_arg;
+    {
+    TIME_THIS
     ImageProcessingCollection::pixelize(active_image, active_image, pixel_size);
+    }
+    update_status_bar_on_load();
+    update_view();
+}
+
+void Backend::imshadingcorrect()
+{
+    JImage& active_image = data_.active_image;
+    {
+    TIME_THIS
+    ImageProcessingCollection::shading_correct(active_image, active_image);
+    }
+    update_view();
+}
+
+void Backend::imintegral()
+{
+    JImage& active_image = data_.active_image;
+    {
+    TIME_THIS
+    ImageProcessingCollection::integral_image(active_image, active_image);
+    }
     update_status_bar_on_load();
     update_view();
 }

@@ -65,6 +65,7 @@ public:
     void imrotate();
     void impixelize();
     void imshadingcorrect();
+    void imintegral();
 
 public slots:
     void execute_command(QString command);

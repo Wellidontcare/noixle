@@ -74,6 +74,9 @@ cv::Mat JImage::from_qimage(QImage image)
 
 unsigned char JImage::channel_val_at(int x, int y, color c)
 {
+    if(x < 0 || y < 0){
+        return 0;
+    }
     if(channels() == 1){
         return this->at<unsigned char>(x, y);
     }

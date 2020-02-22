@@ -27,7 +27,9 @@ namespace ImageProcessingCollection{
     void binarize(const JImage& in, JImage& out, const int threshold);
     void rotate(const JImage& in, JImage& out, const int angle);
     void pixelize(const JImage& in, JImage& out, const int pixel_size);
+    void shading_correct(const JImage& in, JImage& out);
     static void pixelize_single_channel(cv::Mat& in, int pixel_size);
+    void integral_image(const JImage& in, JImage& out);
 }
 
 
