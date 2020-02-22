@@ -24,6 +24,7 @@ namespace ImageProcessingCollection{
     void draw_hist(std::vector<float> hist, JImage& hist_image, const int channel);
     void gamma_correct(const JImage& in, JImage& out, const float gamma_val);
     void binarize(const JImage& in, JImage& out, const int threshold);
+    void rotate(const JImage& in, JImage& out, const int angle);
 }
 
 

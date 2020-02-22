@@ -71,7 +71,8 @@ std::vector<Command> MainWindow::add_available_commands()
         {"histogram", {}, true, {STRING}, 1, "['cumulative'] | displays a histogram of the currently viewed image"},
         {"imequalize", {}, true, {}, 0, "| improves the image contrast by equalizing the histogram"},
         {"imgammacorrect", {}, false, {FLOAT}, 1, "| corrects the gamme by the specified value"},
-        {"imbinarize", {}, true, {INT}, 1, "[threshold] | binarizes an image"}
+        {"imbinarize", {}, true, {INT}, 1, "[threshold] | binarizes an image"},
+        {"imrotate", {}, false, {INT}, 1, "[angle in deg] | rotates an image by the given angle"}
     };
     for(Command c : commands){
         options_.append(QString::fromStdString(c.command));
