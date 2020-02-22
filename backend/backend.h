@@ -47,22 +47,24 @@ public:
     void exit();
     void open();
     void load_snapshot();
-    void iminvert();
     void save();
     void snapshot();
     void record();
     void history();
     void load_macro();
-    void filter();
     void toggle_measure_perf();
     bool meassure_perf();
     void revert();
     void histogram();
+    void iminvert();
+    void imfilter();
     void imcconvert();
     void imequalize();
     void imgammacorrect();
     void imbinarize();
     void imrotate();
+    void impixelize();
+    void imshadingcorrect();
 
 public slots:
     void execute_command(QString command);

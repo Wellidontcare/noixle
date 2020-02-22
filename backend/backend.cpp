@@ -23,12 +23,14 @@ void Backend::populate_function_lut()
     function_lut_["revert"] = &Backend::revert;
     function_lut_["histogram"] = &Backend::histogram;
     function_lut_["imcconvert"] = &Backend::imcconvert;
-    function_lut_["imfilter"] = &Backend::filter;
+    function_lut_["imfilter"] = &Backend::imfilter;
     function_lut_["iminvert"] = &Backend::iminvert;
     function_lut_["imequalize"] = &Backend::imequalize;
     function_lut_["imgammacorrect"] = &Backend::imgammacorrect;
     function_lut_["imbinarize"] = &Backend::imbinarize;
     function_lut_["imrotate"] = &Backend::imrotate;
+    function_lut_["impixelize"] = &Backend::impixelize;
+    function_lut_["imshadingcorrect"] = &Backend::imshadingcorrect;
 
 }
 
@@ -72,7 +74,7 @@ bool Backend::is_revertable(QString command)
 void Backend::update_view()
 {
     if(data_.active_image.empty())
-        throw std::logic_error("No images loaded");
+        throw std::logic_error("Error in " + std::string(__func__) + "\nNo images loaded");
     emit image_updated_sig(data_.active_image.as_qimage());
 }
 
@@ -106,7 +108,7 @@ void Backend::open()
            data_.active_image = ImageProcessingCollection::open_image(data_.current_args[0].string_arg);
         }
         else{
-            throw std::logic_error("Image does not exist!");
+            throw std::logic_error("Error in " + std::string(__func__) + "\nImage does not exist!");
         }
     }
     update_view();
@@ -121,7 +123,7 @@ void Backend::load_snapshot()
     if(data_.current_args.empty()){
         QString snaphot_img_path = tmp_file_path + "/Snapshot" + QString::number(indx) + ".tif";
         if(!QFile(snaphot_img_path).exists()){
-            throw std::logic_error("Can't load snapshot");
+            throw std::logic_error("Error in " + std::string(__func__) + "\nCan't load snapshot");
         }
         set_args({construct_arg(snaphot_img_path)});
         open();
@@ -176,7 +178,7 @@ void Backend::snapshot()
 void Backend::record()
 {
     if(data_.current_args.empty()){
-        throw std::logic_error("Record needs either start or stop arg");
+        throw std::logic_error("Error in " + std::string(__func__) + "\nRecord needs either start or stop arg");
     }
     std::string record_arg = data_.current_args[0].string_arg;
     if(record_arg == "start"){
@@ -192,7 +194,7 @@ void Backend::record()
         }
     }
     else{
-        throw std::logic_error("Invalid arguments");
+        throw std::logic_error("Error in " + std::string(__func__) + "\nInvalid arguments provided!");
     }
 }
 
@@ -221,13 +223,13 @@ void Backend::load_macro()
     {
         file_path = QString::fromStdString(data_.current_args[0].string_arg);
         if(!QFile::exists(file_path)){
-            throw std::logic_error("File does not exist");
+            throw std::logic_error("Error in " + std::string(__func__) + "\nFile does not exist!");
         }
     }
     execute_macro(file_path);
 }
 
-void Backend::filter()
+void Backend::imfilter()
 {   TIME_THIS
     FilterID id = FilterParser::parse(data_.current_args[0].string_arg.c_str());
 }
@@ -247,7 +249,7 @@ void Backend::revert()
     QString tmp_file_path = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
     QString backup_img_file_path = tmp_file_path + "/backup_img.tif";
     if(!QFile(backup_img_file_path).exists())
-        throw std::logic_error("Revert not possible");
+        throw std::logic_error("Error in " + std::string(__func__) + "\nRevert not possible!");
     set_args({construct_arg(backup_img_file_path)});
     open();
 }
@@ -269,7 +271,7 @@ void Backend::histogram()
         return;
     }
     }
-    throw std::logic_error("Invalid argument");
+    throw std::logic_error("Error in " + std::string(__func__) + "\nInvalid argument");
 }
 
 void Backend::imcconvert()
@@ -277,17 +279,17 @@ void Backend::imcconvert()
     int color = cv::COLOR_RGB2BGR;
     if(data_.current_args[0].string_arg == "color"){
         if(data_.active_image.channels() == 3)
-            throw std::logic_error("Image is already in color mode");
+            throw std::logic_error("Error in " + std::string(__func__) + "\nImage is already in color mode");
         color = cv::COLOR_GRAY2BGR;
     }
     else if(data_.current_args[0].string_arg == "gray"){
         if(data_.active_image.channels() == 1){
-            throw std::logic_error("Image is already in grayscale mode");
+            throw std::logic_error("Error in " + std::string(__func__) + "\nmImage is already in grayscale mode");
         }
         color = cv::COLOR_BGR2GRAY;
     }
     else{
-        throw std::logic_error("Invalid conversion code");
+        throw std::logic_error("Error in " + std::string(__func__) + "\nInvalid conversion code");
     }
     {
     TIME_THIS
@@ -341,6 +343,16 @@ void Backend::imrotate()
     int angle = data_.current_args[0].int_arg;
     JImage& image = data_.active_image;
     ImageProcessingCollection::rotate(image, image, angle);
+    update_status_bar_on_load();
+    update_view();
+}
+
+void Backend::impixelize()
+{
+    JImage& active_image = data_.active_image;
+    int& pixel_size = data_.current_args[0].int_arg;
+    ImageProcessingCollection::pixelize(active_image, active_image, pixel_size);
+    update_status_bar_on_load();
     update_view();
 }
 
