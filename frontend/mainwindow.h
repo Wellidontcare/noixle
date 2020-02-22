@@ -13,16 +13,9 @@
 #include "frontend/widgets/helpwindow.h"
 #include "frontend/widgets/binarizewindow.h"
 
-
-//!TODO implement history
-//!TODO implement histogramm [mode]
-//!TODO implement export [histogramm | image]
-//!TODO implement record [file_path]
 //!TODO implement resize [w][h]
 //!TODO implement scale [ratio][width ratio | height ratio]
-//!TODO implement rotate [angle] [deg | rad]
 //!TODO implement filter [gauss | binominal | mean | median | max | min] [ksize]
-//!TODO implement
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE

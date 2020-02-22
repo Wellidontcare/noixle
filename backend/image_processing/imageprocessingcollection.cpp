@@ -1,16 +1,23 @@
 #include "imageprocessingcollection.h"
 namespace ImageProcessingCollection {
 
+template<typename T>
+static T fast_median(std::vector<T> array){
+    std::nth_element(array.begin(), array.begin() + array.size()/2, array.end());
+    return array[array.size()/2];
+}
+
 JImage open_image(std::string file_path)
 {
     return JImage(file_path);
 }
 
+
 void invert_image(const JImage& in, JImage& out)
 {
     out = in.clone();
     if(out.empty()){
-        throw std::logic_error("Not a valid image");
+        throw std::logic_error("Error in " + std::string(__func__) + "\nThis is not a valid image");
     }
     if(out.channels() == 3){
         using Pixel = cv::Point3_<unsigned char>;
@@ -28,7 +35,7 @@ void invert_image(const JImage& in, JImage& out)
 void save_image(const JImage& in, std::string file_path)
 {
     if(in.empty()){
-        throw std::logic_error("Image is empty");
+        throw std::logic_error("Error in " + std::string(__func__) + "\nImage is empty");
     }
     cv::imwrite(file_path, in);
 }
@@ -42,7 +49,7 @@ void histogram(const JImage &in, JImage &histogram, bool cumulative)
         histogram_gray(in, histogram, cumulative);
     }
 
-    else throw std::logic_error("Greyvalue histogram is not implemented yet");
+    else throw std::logic_error("Error in " + std::string(__func__) + "\nGrayvalue histogram is not implemented yet!");
 }
 
 void histogram_bgr(const JImage &in, JImage &histogram, bool cumulative)
@@ -163,7 +170,7 @@ void gamma_correct(const JImage &in, JImage &out, const float gamma_val)
 void binarize(const JImage& in, JImage &out, const int threshold)
 {
     if(in.channels() != 1){
-        throw std::logic_error("Image has to be grayscale!");
+        throw std::logic_error("Error in " + std::string(__func__) + " \nImage has to be grayscale!");
     }
     out = in.clone();
     out.forEach<unsigned char>([threshold](unsigned char& pixel, const int* position){
@@ -180,6 +187,22 @@ void histogram_gray_thresh(const JImage &in, JImage &histogram, const int thresh
 
 void rotate(const JImage &in, JImage &out, const int angle)
 {
+    if(angle == 360){
+        return;
+    }
+    if(angle == 180 || angle == -180){
+        cv::flip(in, out, 0);
+        return;
+    }
+    if(angle == 90){
+        cv::transpose(in, out);
+        return;
+    }
+    if(angle == -90){
+        cv::flip(in, out, 0);
+        cv::transpose(out, out);
+        return;
+    }
     int width = in.cols;
     int height = in.rows;
 
@@ -190,6 +213,59 @@ void rotate(const JImage &in, JImage &out, const int angle)
     cv::Mat rotated = cv::Mat::zeros(in.rows, in.cols, in.type());
     cv::warpAffine(in, rotated, rotation_matrix, rotated.size());
     out = rotated;
+}
+
+void pixelize(const JImage &in, JImage &out, const int pixel_size)
+{
+    out = in;
+    if(out.type() == CV_8UC1){
+        pixelize_single_channel(out, pixel_size);
+    }
+    if(out.type() == CV_8UC3){
+        std::vector<cv::Mat> channels;
+        cv::split(in, channels);
+        for(auto& channel : channels){
+            pixelize_single_channel(channel, pixel_size);
+        }
+        cv::merge(channels, out);
+    }
+}
+
+void pixelize_single_channel(cv::Mat &image, int pixel_size)
+{
+    int original_width = image.cols;
+    int original_height = image.rows;
+    if(image.type() != CV_8UC1){
+        throw std::logic_error("Error in " + std::string(__func__) + "This channel type is not supported");
+    }
+    cv::copyMakeBorder(image, image, pixel_size, pixel_size, pixel_size, pixel_size, cv::BORDER_CONSTANT);
+    std::vector<unsigned char> pixel_roi(pixel_size*pixel_size);
+    unsigned char median;
+    std::vector<unsigned char> roi_vec;
+    cv::Mat roi_mat;
+    for(int y = 0;  y < original_height; y += pixel_size){
+        for(int x = 0; x < original_width; x += pixel_size){
+            roi_mat = image(cv::Range(y, y+pixel_size), cv::Range(x, x+pixel_size)).clone();
+            roi_mat = roi_mat.reshape(0, 1);
+            roi_mat.copyTo(roi_vec);
+            median = fast_median(roi_vec);
+            for(int i = 0; i < pixel_size; ++i){
+                for(int j = 0; j < pixel_size; ++j){
+                    image.at<unsigned char>(y+j, x+i) = median;
+                }
+            }
+        }
+    }
+    image = image(cv::Range(pixel_size, (original_height+pixel_size) - (original_height%pixel_size)), cv::Range(pixel_size, original_width+pixel_size - (original_width%pixel_size)));
+}
+
+void integral_image(const JImage &in, JImage &out)
+{
+    if(in.type() != CV_8UC1){
+        throw("Error in " + std::string(__func__) + "\n");
+    }
+    out = in;
+    cv::Mat integral_image = cv::Mat::zeros(in.rows+1, in.cols+1, CV_8UC1);
 }
 
 }

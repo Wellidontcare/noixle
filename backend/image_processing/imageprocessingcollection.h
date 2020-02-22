@@ -6,6 +6,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+#include <opencv2/photo.hpp>
 #include <opencv2/highgui.hpp>
 
 #include "jimage.h"
@@ -25,6 +26,8 @@ namespace ImageProcessingCollection{
     void gamma_correct(const JImage& in, JImage& out, const float gamma_val);
     void binarize(const JImage& in, JImage& out, const int threshold);
     void rotate(const JImage& in, JImage& out, const int angle);
+    void pixelize(const JImage& in, JImage& out, const int pixel_size);
+    static void pixelize_single_channel(cv::Mat& in, int pixel_size);
 }
 
 
