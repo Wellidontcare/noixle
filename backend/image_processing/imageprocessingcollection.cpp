@@ -79,7 +79,6 @@ std::vector<float> calc_hist(const JImage &channel, bool cumulative)
     int hist_size = 256;
     float range[] = {0, 256};
     const float* hist_range = {range};
-    std::vector<cv::Mat> channels;
     cv::Mat hist_mat;
 
     cv::calcHist(&channel, 1, nullptr, cv::Mat(), hist_mat, 1, &hist_size, &hist_range);
