@@ -164,7 +164,8 @@ void gamma_correct(const JImage &in, JImage &out, const float gamma_val)
                                                                                  });
     }
     if(out.channels() == 1){
-        out.forEach<unsigned char>([gamma_val](unsigned char& pixel, const int* position){pixel = static_cast<unsigned  char>(cv::pow((static_cast<double>(pixel)/255, gamma_val)*255;})));
+        out.forEach<unsigned char>([gamma_val](unsigned char& pixel, const int* position){
+          pixel = static_cast<unsigned char>(cv::pow(static_cast<double>(pixel)/255, gamma_val)*255);});
     }
 }
 
