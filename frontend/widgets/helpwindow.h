@@ -14,7 +14,7 @@ class HelpWindow : public QWidget
     QStringListModel* help_text_;
 public:
     explicit HelpWindow(QWidget *parent = nullptr);
-    void add_help_text(QStringList text);
+    void add_help_text(const QStringList &text);
     ~HelpWindow();
 
 private:

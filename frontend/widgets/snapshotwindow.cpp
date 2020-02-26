@@ -3,6 +3,7 @@
 
 SnapshotViewer::SnapshotViewer(QWidget *parent) :
     QTabWidget(parent),
+    layout_(nullptr),
     ui(new Ui::SnapshotWindow)
 {
     ui->setupUi(this);

@@ -1,4 +1,5 @@
 #include "imageprocessingcollection.h"
+
 namespace ImageProcessingCollection {
 
 template<typename T>
@@ -7,7 +8,7 @@ static T fast_median(std::vector<T> array){
     return array[array.size()/2];
 }
 
-JImage open_image(std::string file_path)
+JImage open_image(const std::string &file_path)
 {
     return JImage(file_path);
 }
@@ -32,7 +33,7 @@ void invert_image(const JImage& in, JImage& out)
     }
 }
 
-void save_image(const JImage& in, std::string file_path)
+void save_image(const JImage& in, const std::string &file_path)
 {
     if(in.empty()){
         throw std::logic_error("Error in " + std::string(__func__) + "\nImage is empty");
@@ -163,7 +164,7 @@ void gamma_correct(const JImage &in, JImage &out, const float gamma_val)
                                                                                  });
     }
     if(out.channels() == 1){
-        out.forEach<unsigned char>([gamma_val](unsigned char& pixel, const int* position){pixel = cv::pow((static_cast<double>(pixel)/255), gamma_val)*255;});
+        out.forEach<unsigned char>([gamma_val](unsigned char& pixel, const int* position){pixel = static_cast<unsigned  char>(cv::pow((static_cast<double>(pixel)/255, gamma_val)*255;})));
     }
 }
 
@@ -181,7 +182,6 @@ void binarize(const JImage& in, JImage &out, const int threshold)
 void histogram_gray_thresh(const JImage &in, JImage &histogram, const int threshold)
 {
     histogram_gray(in, histogram);
-    int channels = histogram.channels();
     cv::line(histogram, {threshold, 0}, {threshold, 250},{0, 0, 255});
 }
 
@@ -284,6 +284,10 @@ void integral_image(const JImage &in, JImage &out)
 
 void shading_correct(const JImage &in, JImage &out)
 {
+    if(in.type() != CV_8UC1){
+      throw std::logic_error("Error in " + std::string(__func__)
+      + ": invalid image type, image has to be grayscale");
+    }
     JImage flat_field = out.clone();
     const int& width = in.cols;
     const int& height = in.rows;

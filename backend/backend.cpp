@@ -1,6 +1,6 @@
 ﻿#include "backend.h"
 
-Backend::Backend(std::vector<Command> available_commands, QWidget* parent)
+Backend::Backend(const std::vector<Command> &available_commands, QWidget* parent)
     : parser_(available_commands),
       parent_(parent)
 {
@@ -57,17 +57,17 @@ Arg Backend::construct_arg(double arg)
     return {0, arg, ""};
 }
 
-Arg Backend::construct_arg(std::string arg)
+Arg Backend::construct_arg(const std::string &arg)
 {
     return {0, 0, arg};
 }
 
-Arg Backend::construct_arg(QString arg)
+Arg Backend::construct_arg(const QString &arg)
 {
     return {0, 0, arg.toStdString()};
 }
 
-bool Backend::is_revertable(QString command)
+bool Backend::is_revertable(const QString &command)
 {
     return command.startsWith("im");
 }
@@ -202,7 +202,7 @@ void Backend::record()
 void Backend::history()
 {
     QString hist_string;
-    for(QString command : data_.command_history){
+    for(const QString& command : data_.command_history){
         hist_string += command + '\n';
     }
     emit history_requested_sig(hist_string);
@@ -277,7 +277,7 @@ void Backend::histogram()
 
 void Backend::imcconvert()
 {
-    int color = cv::COLOR_RGB2BGR;
+    int color;
     if(data_.current_args[0].string_arg == "color"){
         if(data_.active_image.channels() == 3)
             throw std::logic_error("Error in " + std::string(__func__) + "\nImage is already in color mode");
@@ -315,7 +315,7 @@ void Backend::imgammacorrect()
     JImage& active_image = data_.active_image;
     {
         TIME_THIS
-        ImageProcessingCollection::gamma_correct(active_image, active_image, data_.current_args[0].float_arg);
+        ImageProcessingCollection::gamma_correct(active_image, active_image, static_cast<double>(data_.current_args[0].float_arg));
     }
     update_view();
 }
@@ -374,14 +374,14 @@ void Backend::imintegral()
 {
     JImage& active_image = data_.active_image;
     {
-    TIME_THIS
+      TIME_THIS
     ImageProcessingCollection::integral_image(active_image, active_image);
     }
     update_status_bar_on_load();
     update_view();
 }
 
-void Backend::execute_command(QString command)
+void Backend::execute_command(const QString &command)
 {
     if(is_revertable(command)){
         backup();
@@ -411,7 +411,7 @@ void Backend::update_status_bar_dynamic(int x, int y)
     emit update_status_bar_dynamic_sig(StatusBarInfoDynamic{y, x, r, g, b});
 }
 
-void Backend::show_performance_info(QString time_taken)
+void Backend::show_performance_info(const QString &time_taken)
 {
     QString perf_info = "Function took: " + time_taken;
     emit performance_info_requested_sig(perf_info);
@@ -422,12 +422,12 @@ void Backend::set_active_snapshot(int idx)
     data_.active_snapshot_idx = idx;
 }
 
-void Backend::save_to_history(QString command, QString args)
+void Backend::save_to_history(const QString &command, const QString &args)
 {
     data_.command_history.append(command + " " + args);
 }
 
-void Backend::execute_macro(QString file_path)
+void Backend::execute_macro(const QString &file_path)
 {
     std::fstream macro_file(file_path.toStdString());
     std::string command;

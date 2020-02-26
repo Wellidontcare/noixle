@@ -35,16 +35,16 @@ MainWindow::~MainWindow()
     delete backend_;
 }
 
-void MainWindow::execute_command(QString command)
+void MainWindow::execute_command(const QString &command)
 {
     try {
         backend_->execute_command(command);
-    } catch (std::logic_error e) {
+    } catch (std::logic_error& e) {
         QMessageBox::critical(this, "Error", e.what());
     }
 }
 
-void MainWindow::show_performance_info(QString performance_info)
+void MainWindow::show_performance_info(const QString &performance_info)
 {
     if(backend_->meassure_perf()){
         QMessageBox::information(this, "Performance report", performance_info);
@@ -77,7 +77,7 @@ std::vector<Command> MainWindow::add_available_commands()
         {"imshadingcorrect", {}, true, {}, 0, "| corrects the shading on an image"},
         {"imintegral", {}, true, {}, 0, "| calcuates the integralimage of the active image"}
     };
-    for(Command c : commands){
+    for(const Command& c : commands){
         options_.append(QString::fromStdString(c.command));
         help_text_.append(QString::fromStdString(c.command) + " " + QString::fromStdString(c.help_text));
     }

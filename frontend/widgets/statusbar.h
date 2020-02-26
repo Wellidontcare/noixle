@@ -17,7 +17,7 @@ class StatusBar : public QStatusBar
     QLabel* spacer_;
 public:
     StatusBar(QWidget* parent = nullptr);
-    ~StatusBar();
+    ~StatusBar() = default;
 
 public slots:
     void update_dynamic(StatusBarInfoDynamic info);

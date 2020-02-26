@@ -15,7 +15,7 @@ public:
     ~Timer();
 
 signals:
-    void meassured_time(QString);
+    void measured_time(QString);
 
 public slots:
 };

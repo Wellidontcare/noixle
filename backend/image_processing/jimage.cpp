@@ -15,13 +15,13 @@ QImage JImage::as_qimage()
     if(this->channels() == 3){
         JImage rb_swapped;
         cv::cvtColor(*this, rb_swapped, cv::COLOR_BGR2RGB);
-        return QImage(static_cast<uchar*>(rb_swapped.data),
+        return QImage(rb_swapped.data,
                       rb_swapped.cols, rb_swapped.rows,
                       static_cast<int>(rb_swapped.step),
                       QImage::Format::Format_RGB888).copy();
     }
     if(this->channels() == 1){
-        return QImage(static_cast<uchar*>(this->data),
+        return QImage(this->data,
                       this->cols, this->rows,
                       static_cast<int>(this->step),
                       QImage::Format_Grayscale8).copy();

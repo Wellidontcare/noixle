@@ -12,9 +12,9 @@
 #include "jimage.h"
 
 namespace ImageProcessingCollection{
-    JImage open_image(std::string file_path);
+    JImage open_image(const std::string &file_path);
     void invert_image(const JImage& in, JImage& out);
-    void save_image(const JImage& in, std::string file_path);
+    void save_image(const JImage& in, const std::string &file_path);
     void histogram(const JImage& in, JImage& histogram, bool cumulative = false);
     void convert_color(const JImage& in, JImage& out, int color);
     void histogram_bgr(const JImage& in, JImage& histogram, bool cumulative = false);

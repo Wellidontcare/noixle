@@ -19,8 +19,8 @@ public:
     void resizeEvent(QResizeEvent *event) override;
 
 public slots:
-    void update_image(QImage image);
-    void show_text(QString text);
+    void update_image(const QImage &image);
+    void show_text(const QString &text);
     void emit_update_status_bar_sig(int x, int y);
 
 signals:

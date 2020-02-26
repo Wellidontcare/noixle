@@ -7,7 +7,7 @@ ZoomEnabledGraphicsView::ZoomEnabledGraphicsView(QWidget *parent)
     setScene(&scene_);
 }
 
-void ZoomEnabledGraphicsView::update_image(QImage image)
+void ZoomEnabledGraphicsView::update_image(const QImage &image)
 {
  scene_.clear();
  QPixmap pixmap = QPixmap::fromImage(image);
@@ -18,7 +18,7 @@ void ZoomEnabledGraphicsView::update_image(QImage image)
  fitInView(scene_.itemsBoundingRect(), Qt::KeepAspectRatio);
 }
 
-void ZoomEnabledGraphicsView::show_text(QString text)
+void ZoomEnabledGraphicsView::show_text(const QString &text)
 {
     scene_.clear();
     scene_.addText(text);

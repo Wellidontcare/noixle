@@ -18,9 +18,6 @@ StatusBar::StatusBar(QWidget *parent)
     rgb_label_->setTextFormat(Qt::TextFormat::RichText);
 }
 
-StatusBar::~StatusBar()
-{}
-
 void StatusBar::update_dynamic(StatusBarInfoDynamic info)
 {
     pos_label_->setText("X -> " + QString::number(info.x) + " " + "Y -> " + QString::number(info.y));

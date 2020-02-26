@@ -12,10 +12,11 @@
 #include "frontend/widgets/histogramviewer.h"
 #include "frontend/widgets/helpwindow.h"
 #include "frontend/widgets/binarizewindow.h"
+#include "frontend/widgets/commandlineedit.h"
 
 //!TODO implement resize [w][h]
 //!TODO implement scale [ratio][width ratio | height ratio]
-//!TODO implement filter [gauss | binominal | mean | median | max | min] [ksize]
+//!TODO implement filter [gauss | binomial | mean | median | max | min] [ksize]
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -34,10 +35,10 @@ class MainWindow : public QMainWindow
 
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
-    void execute_command(QString command);
-    void show_performance_info(QString performance_info);
+    void execute_command(const QString &command);
+    void show_performance_info(const QString &performance_info);
 
 private:
     Ui::MainWindow *ui;
@@ -45,6 +46,6 @@ private:
 
     // QWidget interface
 protected:
-    void keyPressEvent(QKeyEvent *event);
+    void keyPressEvent(QKeyEvent *event) override;
 };
 #endif // MAINWINDOW_H

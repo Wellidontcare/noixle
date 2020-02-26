@@ -1,5 +1,5 @@
 #include "mousetrackerpixmapitem.h"
-MouseTrackerPixmapItem::MouseTrackerPixmapItem(QPixmap pixmap)
+MouseTrackerPixmapItem::MouseTrackerPixmapItem(const QPixmap &pixmap)
     : QObject(), QGraphicsPixmapItem (pixmap)
 {
     setAcceptHoverEvents(true);
