@@ -82,6 +82,7 @@ std::vector<Command> MainWindow::add_available_commands()
         help_text_.append(QString::fromStdString(c.command) + " " + QString::fromStdString(c.help_text));
     }
     help_text_.append("Use Tab to autocomplete!");
+    help_text_.append("You can zoom with scrolling in and out while pressing Ctrl or by using the + and - keys");
     help_window_->add_help_text(help_text_);
     return commands;
 }
@@ -92,10 +93,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         backend_->help();
     }
     if(event->key() == Qt::Key_Plus){
-        ui->graphicsView->zoom(true);
+        ui->graphicsView->zoom(true, true);
     }
     if(event->key() == Qt::Key_Minus){
-        ui->graphicsView->zoom(false);
+        ui->graphicsView->zoom(false, true);
     }
     else{
         QMainWindow::keyPressEvent(event);

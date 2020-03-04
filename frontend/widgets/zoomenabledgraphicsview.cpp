@@ -31,14 +31,14 @@ void ZoomEnabledGraphicsView::emit_update_status_bar_sig(int x, int y)
     emit update_status_bar_sig(x, y);
 }
 
-void ZoomEnabledGraphicsView::zoom(bool zoom_in)
+void ZoomEnabledGraphicsView::zoom(bool zoom_in, bool fast_zoom)
 {
     double zoom_step;
     if(zoom_in){
-        zoom_step = 1.25;
+        zoom_step = fast_zoom ? 1.5 : 1.1;
     }
     else{
-        zoom_step = 1/1.25;;
+        zoom_step = fast_zoom ? 1/1.5 : 1/1.1;
     }
     this->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     this->scale(zoom_step, zoom_step);
@@ -49,11 +49,12 @@ void ZoomEnabledGraphicsView::wheelEvent(QWheelEvent *event)
     if(QApplication::keyboardModifiers() == Qt::ControlModifier){
         bool in = true;
         bool out = false;
+        bool fast_zoom = true;
         if(event->delta() > 0){
-            zoom(in);
+            zoom(in, !fast_zoom);
         }
         else{
-            zoom(out);
+            zoom(out, !fast_zoom);
         }
     }
 }

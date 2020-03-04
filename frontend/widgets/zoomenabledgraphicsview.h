@@ -23,7 +23,7 @@ public slots:
     void update_image(const QImage &image);
     void show_text(const QString &text);
     void emit_update_status_bar_sig(int x, int y);
-    void zoom(bool zoom_in);
+    void zoom(bool zoom_in, bool fast_zoom);
     void wheelEvent(QWheelEvent *event) override;
 
 signals:
