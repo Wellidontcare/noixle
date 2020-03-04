@@ -91,6 +91,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     if(event->key() == Qt::Key_F1){
         backend_->help();
     }
+    if(event->key() == Qt::Key_Plus){
+        ui->graphicsView->zoom(true);
+    }
+    if(event->key() == Qt::Key_Minus){
+        ui->graphicsView->zoom(false);
+    }
     else{
         QMainWindow::keyPressEvent(event);
     }
