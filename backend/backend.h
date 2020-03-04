@@ -41,7 +41,7 @@ class Backend : public QObject
 
 
 public:
-    Backend(std::vector<Command> available_commands, QWidget* parent = nullptr);
+    Backend(const std::vector<Command> &available_commands, QWidget* parent = nullptr);
     void update_view();
     void help();
     void exit();
@@ -65,12 +65,13 @@ public:
     void imrotate();
     void impixelize();
     void imshadingcorrect();
+    void imintegral();
 
 public slots:
-    void execute_command(QString command);
+    void execute_command(const QString &command);
     void update_status_bar_on_load();
     void update_status_bar_dynamic(int x, int y);
-    void show_performance_info(QString time_taken);
+    void show_performance_info(const QString &time_taken);
     void set_active_snapshot(int idx);
 
 
@@ -88,17 +89,16 @@ signals:
     void binarize_wizard_sig(JImage);
 
 private:
-    void save_to_history(QString command, QString args);
-    void execute_macro(QString file_path);
+    void save_to_history(const QString &command, const QString &args);
+    void execute_macro(const QString &file_path);
     void populate_function_lut();
     void backup();
-    QString image_format();
     void set_args(const std::vector<Arg>& args);
-    Arg construct_arg(int arg);
-    Arg construct_arg(double arg);
-    Arg construct_arg(std::string arg);
-    Arg construct_arg(QString arg);
-    bool is_revertable(QString command);
+    static Arg construct_arg(int arg);
+    static Arg construct_arg(double arg);
+    static Arg construct_arg(const std::string &arg);
+    static Arg construct_arg(const QString &arg);
+    bool is_revertable(const QString &command);
 };
 
 #endif // BACKEND_H

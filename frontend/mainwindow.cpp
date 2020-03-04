@@ -35,16 +35,16 @@ MainWindow::~MainWindow()
     delete backend_;
 }
 
-void MainWindow::execute_command(QString command)
+void MainWindow::execute_command(const QString &command)
 {
     try {
         backend_->execute_command(command);
-    } catch (std::logic_error e) {
+    } catch (std::logic_error& e) {
         QMessageBox::critical(this, "Error", e.what());
     }
 }
 
-void MainWindow::show_performance_info(QString performance_info)
+void MainWindow::show_performance_info(const QString &performance_info)
 {
     if(backend_->meassure_perf()){
         QMessageBox::information(this, "Performance report", performance_info);
@@ -73,13 +73,16 @@ std::vector<Command> MainWindow::add_available_commands()
         {"imgammacorrect", {}, false, {FLOAT}, 1, "| corrects the gamme by the specified value"},
         {"imbinarize", {}, true, {INT}, 1, "[threshold] | binarizes the active image (if the function is called with no arguments a binarize test wizard is opened)"},
         {"imrotate", {}, false, {INT}, 1, "[angle in deg] | rotates the active image by the given angle to the left"},
-        {"impixelize", {}, false, {INT}, 1, "[pixelsize] | pixelizes the active image"}
+        {"impixelize", {}, false, {INT}, 1, "[pixelsize] | pixelizes the active image"},
+        {"imshadingcorrect", {}, true, {}, 0, "| corrects the shading on an image"},
+        {"imintegral", {}, true, {}, 0, "| calcuates the integralimage of the active image"}
     };
-    for(Command c : commands){
+    for(const Command& c : commands){
         options_.append(QString::fromStdString(c.command));
         help_text_.append(QString::fromStdString(c.command) + " " + QString::fromStdString(c.help_text));
     }
     help_text_.append("Use Tab to autocomplete!");
+    help_text_.append("You can zoom with scrolling in and out while pressing Ctrl or by using the + and - keys");
     help_window_->add_help_text(help_text_);
     return commands;
 }
@@ -88,6 +91,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     if(event->key() == Qt::Key_F1){
         backend_->help();
+    }
+    if(event->key() == Qt::Key_Plus){
+        ui->graphicsView->zoom(true, true);
+    }
+    if(event->key() == Qt::Key_Minus){
+        ui->graphicsView->zoom(false, true);
     }
     else{
         QMainWindow::keyPressEvent(event);

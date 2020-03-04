@@ -11,7 +11,7 @@ HistogramViewer::HistogramViewer(QWidget *parent)
     setLayout(layout_);
 }
 
-void HistogramViewer::show_histogram(QImage hist)
+void HistogramViewer::show_histogram(const QImage &hist)
 {
     view_->update_image(hist);
     show();

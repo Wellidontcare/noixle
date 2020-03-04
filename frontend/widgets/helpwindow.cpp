@@ -11,7 +11,7 @@ HelpWindow::HelpWindow(QWidget *parent) :
     ui->listView->setEditTriggers(QAbstractItemView::EditTrigger::NoEditTriggers);
 }
 
-void HelpWindow::add_help_text(QStringList text)
+void HelpWindow::add_help_text(const QStringList &text)
 {
     if(help_text_){
         delete help_text_;

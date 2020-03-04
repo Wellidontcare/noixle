@@ -1,7 +1,7 @@
 #include "commandparser.h"
 
-CommandParser::CommandParser(const std::vector<Command>& available_commands)
-    : available_commands_(available_commands) {}
+CommandParser::CommandParser(std::vector<Command> available_commands)
+    : available_commands_(std::move(available_commands)) {}
 
 Command CommandParser::parse(const char *input)
 {

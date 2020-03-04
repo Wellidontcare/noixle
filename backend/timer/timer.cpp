@@ -8,5 +8,5 @@ Timer::Timer(QObject *parent) :
 Timer::~Timer(){
     auto time_taken = std::chrono::duration_cast<std::chrono::microseconds>
             (std::chrono::high_resolution_clock::now() - start_time).count();
-    emit meassured_time(QString::number(time_taken)+ "mu");
+    emit measured_time(QString::number(time_taken)+ "mu");
 }

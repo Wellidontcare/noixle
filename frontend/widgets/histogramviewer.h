@@ -16,7 +16,7 @@ public:
     explicit HistogramViewer(QWidget *parent = nullptr);
 
 public slots:
-    void show_histogram(QImage hist);
+    void show_histogram(const QImage &hist);
 
 };
 

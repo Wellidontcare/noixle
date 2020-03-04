@@ -1,7 +1,11 @@
 #include "commandlineedit.h"
 
+#include <utility>
+
 CommandLineEdit::CommandLineEdit(QWidget* parent)
-    : QLineEdit(parent){}
+    : QLineEdit(parent),
+    completer(nullptr)
+    {}
 
 void CommandLineEdit::keyPressEvent(QKeyEvent* event)
 {
@@ -30,8 +34,8 @@ void CommandLineEdit::keyPressEvent(QKeyEvent* event)
 
 bool CommandLineEdit::event(QEvent *event){
     if(event->type() == QEvent::KeyPress){
-        if(static_cast<QKeyEvent*>(event)->key() == Qt::Key::Key_Tab){
-            keyPressEvent(static_cast<QKeyEvent*>(event));
+        if(dynamic_cast<QKeyEvent*>(event)->key() == Qt::Key::Key_Tab){
+            keyPressEvent(dynamic_cast<QKeyEvent*>(event));
             return true;
         }
         return QLineEdit::event(event);
@@ -41,7 +45,7 @@ bool CommandLineEdit::event(QEvent *event){
 
 void CommandLineEdit::populate_options(QStringList list)
 {
-    available_options = list;
+    available_options = std::move(list);
     completer = new QCompleter(available_options, this);
     setCompleter(completer);
 }

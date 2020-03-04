@@ -5,6 +5,7 @@
 #include <QGraphicsView>
 #include <QMouseEvent>
 #include <QGraphicsItem>
+#include <QApplication>
 
 #include "mousetrackerpixmapitem.h"
 
@@ -16,12 +17,14 @@ class ZoomEnabledGraphicsView : public QGraphicsView
 
 public:
     ZoomEnabledGraphicsView(QWidget* parent = nullptr);
-    void resizeEvent(QResizeEvent *event) override;
 
 public slots:
-    void update_image(QImage image);
-    void show_text(QString text);
+    void adjust_on_resize();
+    void update_image(const QImage &image);
+    void show_text(const QString &text);
     void emit_update_status_bar_sig(int x, int y);
+    void zoom(bool zoom_in, bool fast_zoom);
+    void wheelEvent(QWheelEvent *event) override;
 
 signals:
     void update_status_bar_sig(int, int);

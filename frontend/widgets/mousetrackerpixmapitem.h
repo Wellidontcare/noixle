@@ -9,7 +9,7 @@ class MouseTrackerPixmapItem : public QObject, public QGraphicsPixmapItem
     Q_OBJECT
 
 public:
-    MouseTrackerPixmapItem(QPixmap pixmap);
+    MouseTrackerPixmapItem(const QPixmap &pixmap);
 
 protected:
     void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
