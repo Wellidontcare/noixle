@@ -120,7 +120,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         ui->graphicsView->zoom(false, true);
     }
     if(event->key() == Qt::Key_Alt){
-        if(drag_key_released == true){
+        if(drag_key_released){
             ui->graphicsView->setDragMode(QGraphicsView::ScrollHandDrag);
             drag_key_released = false;
         }

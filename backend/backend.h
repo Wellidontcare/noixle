@@ -69,8 +69,6 @@ public:
   void sub();
   void mul();
   void div();
-  void sqrt();
-  void pow();
   void imresize();
   void imdft();
 
@@ -100,14 +98,14 @@ private:
   void populate_function_lut();
   void backup();
   void set_args(const std::vector<Arg> &args);
-  JImage get_snapshot_by_index(int idx);
   JImage &get_active_image();
   std::tuple<JImage, double, CalcTypeEnum> get_image_or_scalar_for_calc(CalcType type);
+  bool is_revertable(const QString &command);
+  static JImage get_snapshot_by_index(int idx);
   static Arg construct_arg(int arg);
   static Arg construct_arg(double arg);
   static Arg construct_arg(const std::string &arg);
   static Arg construct_arg(const QString &arg);
-  bool is_revertable(const QString &command);
 };
 
 #endif // BACKEND_H

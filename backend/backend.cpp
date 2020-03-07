@@ -49,7 +49,7 @@ void Backend::set_args(const std::vector<Arg> &args) {
   data_.current_args = args;
 }
 
-JImage Backend::get_snapshot_by_index(int idx) {
+static JImage Backend::get_snapshot_by_index(int idx) {
   QString tmp_file_path = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
   QString snaphot_img_path = tmp_file_path + "/Snapshot" + QString::number(idx) + ".tif";
   if (!QFile(snaphot_img_path).exists()) {
@@ -375,7 +375,7 @@ void Backend::imgammacorrect() {
     TIME_THIS
     ImageProcessingCollection::gamma_correct(active_image,
                                              active_image,
-                                             static_cast<double>(data_.current_args[0].float_arg));
+                                             data_.current_args[0].float_arg);
   }
   update_view();
 }
