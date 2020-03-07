@@ -4,7 +4,8 @@ CommandParser::CommandParser(std::vector<Command> available_commands)
     : available_commands_(std::move(available_commands)) {}
 
 Command CommandParser::parse(const char *input) {
-  std::stringstream input_stream(input);
+
+ std::stringstream input_stream(input);
   std::string command;
   std::vector<Arg> args;
   input_stream >> command;
@@ -22,8 +23,8 @@ Command CommandParser::parse(const char *input) {
     if (max_arg_count < current_arg_count && !(current_arg_count == 0 && available_command->null_argument_callable)) {
       throw std::logic_error("Error in " + std::string(__func__) + "\nInvalid number of arguments");
     }
-    if (current_arg_count == 0 && !available_command->null_argument_callable) {
-      throw std::logic_error("Error in " + std::string(__func__) + "\nThis command requires arguments");
+    if (current_arg_count < max_arg_count && !available_command->null_argument_callable) {
+      throw std::logic_error("Error in " + std::string(__func__) + "\nThis command requires more arguments");
     }
     if (has_correct_types(*available_command, args)) {
       Command ret_command(*available_command);

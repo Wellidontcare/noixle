@@ -77,10 +77,10 @@ std::vector<Command> MainWindow::add_available_commands()
         {"imshadingcorrect", {}, true, {}, 0, "| corrects the shading on an image"},
         {"imintegral", {}, true, {}, 0, "| calcuates the integralimage of the active image"},
         {"imresize", {}, false, {INT, INT}, 2, " [width, heigh] | resize image to give arguments"},
-        {"sub", {}, false, {STRING, STRING},2, "[a b] | subtract b from a, image or scalar, i is active image, s marks snaphot images Example: sub s1 s2"},
-        {"add", {}, false, {STRING, STRING},2, "[a b] |add b to a, image or scalar, i is active image, s marks snaphot images Example: add i 25"},
-        {"mul", {}, false, {STRING, STRING},2, "[a b] | multiply a with b, image or scalar, i is active image, s marks snaphot images Example: mul s1 2"},
-        {"div", {}, false, {STRING, STRING},2, "[a b] | divide a by b, image or scalar, i is active image, s marks snaphot images Example: div s2 s1"},
+        {"sub", {}, false, {STRING, STRING}, 2, "[a b] | subtract b from a, image or scalar, i is active image, s marks snaphot images Example: sub s1 s2"},
+        {"add", {}, false, {STRING, STRING}, 2, "[a b] |add b to a, image or scalar, i is active image, s marks snaphot images Example: add i 25"},
+        {"mul", {}, false, {STRING, STRING}, 2, "[a b] | multiply a with b, image or scalar, i is active image, s marks snaphot images Example: mul s1 2"},
+        {"div", {}, false, {STRING, STRING}, 2, "[a b] | divide a by b, image or scalar, i is active image, s marks snaphot images Example: div s2 s1"},
         {"imdft", {}, true, {}, 0, "| shows the spectral domain of the image"}
     };
     for(const Command& c : commands){
