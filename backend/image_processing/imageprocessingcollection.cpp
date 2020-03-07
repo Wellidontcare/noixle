@@ -433,25 +433,25 @@ void discrete_fourier_transform(JImage in, JImage &out)
     int c_x = mag.cols / 2;
     int c_y = mag.rows / 2;
 
-    cv::Rect rect0(0, 0, c_x, c_y);
-    cv::Rect rect1(c_x, 0, c_x, c_y);
-    cv::Rect rect2(0, c_y, c_x, c_y);
-    cv::Rect rect3(c_x, c_y, c_x, c_y);
+    cv::Rect top_left_rect(0, 0, c_x, c_y);
+    cv::Rect top_right_rect(c_x, 0, c_x, c_y);
+    cv::Rect bottom_left_rect(0, c_y, c_x, c_y);
+    cv::Rect bottom_right_rect(c_x, c_y, c_x, c_y);
 
-    cv::Mat q0 = mag(rect0);
-    cv::Mat q1 = mag(rect1);
-    cv::Mat q2 = mag(rect2);
-    cv::Mat q3 = mag(rect3);
+    cv::Mat top_left_quadrant = mag(top_left_rect);
+    cv::Mat top_right_quadrant = mag(top_right_rect);
+    cv::Mat bottom_left_quadrant = mag(bottom_left_rect);
+    cv::Mat bottom_right_quadrant = mag(bottom_right_rect);
 
     cv::Mat tmp;
 
-    q0.copyTo(tmp);
-    q3.copyTo(q0);
-    tmp.copyTo(q3);
+    top_left_quadrant.copyTo(tmp);
+    bottom_right_quadrant.copyTo(top_left_quadrant);
+    tmp.copyTo(bottom_right_quadrant);
 
-    q1.copyTo(tmp);
-    q2.copyTo(q1);
-    tmp.copyTo(q2);
+    bottom_left_quadrant.copyTo(tmp);
+    top_right_quadrant.copyTo(bottom_left_quadrant);
+    tmp.copyTo(top_right_quadrant);
 
     cv::normalize(mag, mag, 0, 255, cv::NORM_MINMAX);
     mag.convertTo(mag, CV_8UC1);
