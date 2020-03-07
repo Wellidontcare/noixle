@@ -231,7 +231,7 @@ void pixelize(const JImage &in, JImage &out, const int pixel_size)
     }
 }
 
-void pixelize_single_channel(cv::Mat &image, int pixel_size)
+static void pixelize_single_channel(cv::Mat &image, int pixel_size)
 {
     int original_width = image.cols;
     int original_height = image.rows;
@@ -308,6 +308,92 @@ void shading_correct(const JImage &in, JImage &out)
     }
     //cv::normalize(out, out, 255, 0, cv::NORM_MINMAX);
     out.convertTo(out, CV_8UC1);
+}
+
+static void custom_filter_single_channel(const cv::Mat& in, cv::Mat &out, const cv::Mat &custom_kernel)
+{
+    if(in.channels() != 1){
+        throw std::logic_error("Error in " + std::string(__func__) + " invalid number of channels");
+    }
+    cv::Mat image = in.clone();
+    out = cv::Mat::zeros(in.rows, in.cols, CV_8UC1);
+    int i_width = in.cols;
+    int i_height = in.rows;
+    int k_width = custom_kernel.cols;
+    int k_height = custom_kernel.rows;
+    double sum;
+    for(int y = k_height/2; y < i_height - (k_height/2); ++y){
+        for(int x = k_width/2; x < i_width - (k_width/2); ++x){
+            sum = 0;
+            for(int i = -(k_height/2); i <= (k_height/2); ++i){
+                for(int j = -(k_width/2); j <= (k_width/2); ++j){
+                    sum += image.at<uchar>(y + i, x + j) * custom_kernel.at<double>(i + (k_height/2), j + (k_width/2));
+                }
+            }
+            out.at<uchar>(y, x) = abs(sum);
+        }
+    }
+}
+
+void custom_filter_multi_channel(const JImage in, JImage &out, const JImage &custom_kernel)
+{
+    if(in.channels() == 1){
+        custom_filter_single_channel(in, out, custom_kernel);
+    }
+    else{
+        std::vector<cv::Mat> channels;
+        cv::split(in, channels);
+        for(cv::Mat& channel : channels){
+            custom_filter_single_channel(channel, channel, custom_kernel);
+        }
+        cv::merge(channels, out);
+    }
+}
+
+void median(const JImage &in, JImage &out, int size)
+{
+    cv::medianBlur(in, out, size);
+}
+
+void gaussian(const JImage &in, JImage &out, cv::Size size, double sigma)
+{
+    cv::GaussianBlur(in, out, size, sigma);
+}
+
+void bilateral(const JImage &in, JImage &out, double sigma_color, double sigma_space)
+{
+    cv::Mat zeros = cv::Mat::zeros(in.rows, in.cols, CV_8UC3);
+    cv::bilateralFilter(in, zeros, -1, sigma_color, sigma_space);
+    out = zeros;
+}
+
+void sobel(const JImage &in, JImage &out, int x_order, int y_order, int size)
+{
+    if(size > 7){
+        throw std::logic_error("Error in " + std::string(__func__) + " kernel size greater 7 not supported");
+    }
+    cv::Sobel(in, out, -1, x_order, y_order, size);
+}
+void dilate(const JImage &in, JImage &out, cv::Mat strel) {
+  cv::dilate(in, out, strel);
+}
+void erode(const JImage &in, JImage &out, cv::Mat strel) {
+    cv::erode(in, out, strel);
+}
+
+void laplace(const JImage &in, JImage &out, int size)
+{
+    if(size > 31){
+        throw std::logic_error("Error in " + std::string(__func__) + " kernel size greater 31 not supported");
+    }
+    cv::Laplacian(in, out, -1, size);
+}
+
+JImage make_jimage(cv::MatExpr expr)
+{
+ cv::Mat mat(expr);
+ mat.convertTo(mat, CV_8UC1);
+ return JImage(mat);
 }
 
 }

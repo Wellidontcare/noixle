@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "command.h"
-
 class CommandParser
 {
 std::vector<Command> available_commands_;
@@ -18,6 +17,7 @@ public:
 
 private:
     static bool has_correct_types(const Command& command, std::vector<Arg>& args);
+
 };
 
 #endif // COMMANDPARSER_H

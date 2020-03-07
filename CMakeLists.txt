@@ -53,6 +53,8 @@ FILE(GLOB NOIXLE_SRC
     frontend/widgets/binarizewindow.cpp
     frontend/widgets/binarizewindow.h
     frontend/widgets/binarizewindow.ui
+    backend/parser/calculation_parser.cpp
+    backend/parser/calculation_parser.h
     resources.qrc
 )
 

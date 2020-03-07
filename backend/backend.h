@@ -11,6 +11,7 @@
 
 #include "parser/commandparser.h"
 #include "parser/filterparser.h"
+#include "parser/calculation_parser.h"
 #include "image_processing/imageprocessingcollection.h"
 #include "timer/timer.h"
 #include "timer/timethismacro.h"
@@ -66,6 +67,12 @@ public:
     void impixelize();
     void imshadingcorrect();
     void imintegral();
+    void add();
+    void sub();
+    void mul();
+    void div();
+    void sqrt();
+    void pow();
 
 public slots:
     void execute_command(const QString &command);
@@ -94,6 +101,9 @@ private:
     void populate_function_lut();
     void backup();
     void set_args(const std::vector<Arg>& args);
+    JImage get_snapshot_by_index(int idx);
+    JImage& get_active_image();
+    std::tuple<JImage, double, CalcTypeEnum> get_image_or_scalar_for_calc(CalcType type);
     static Arg construct_arg(int arg);
     static Arg construct_arg(double arg);
     static Arg construct_arg(const std::string &arg);

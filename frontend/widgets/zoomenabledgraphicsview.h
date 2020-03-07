@@ -19,7 +19,6 @@ public:
     ZoomEnabledGraphicsView(QWidget* parent = nullptr);
 
 public slots:
-    void adjust_on_resize();
     void update_image(const QImage &image);
     void show_text(const QString &text);
     void emit_update_status_bar_sig(int x, int y);
@@ -28,8 +27,6 @@ public slots:
 
 signals:
     void update_status_bar_sig(int, int);
-
-
 };
 
 #endif // ZOOMENABLEDGRAPHICSVIEW_H
