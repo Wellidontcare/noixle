@@ -401,4 +401,61 @@ void resize(const JImage &in, JImage &out, int width, int height)
     cv::resize(in, out, {width, height});
 }
 
+void discrete_fourier_transform(JImage in, JImage &out)
+{
+    if(in.channels() > 1){
+        convert_color(in, in, cv::COLOR_BGR2GRAY);
+    }
+    int opt_rows = cv::getOptimalDFTSize(in.rows);
+    int opt_cols = cv::getOptimalDFTSize(in.cols);
+    cv::Mat dft_mat;
+    cv::copyMakeBorder(in, dft_mat, 0, opt_rows - in.rows, 0, opt_cols - in.cols, cv::BORDER_CONSTANT, cv::Scalar::all(0));
+    cv::Mat plane_0;
+    dft_mat.convertTo(plane_0, CV_32F);
+    std::vector<cv::Mat> planes;
+    cv:: Mat complex_plain;
+    complex_plain.convertTo(complex_plain, CV_32F);
+    cv::Mat plane_1 = cv::Mat::zeros(opt_rows, opt_cols, CV_32F);
+    planes.push_back(plane_0);
+    planes.push_back(plane_1);
+    cv::merge(planes, complex_plain);
+
+    cv::dft(complex_plain, complex_plain);
+
+    cv::split(complex_plain, planes);
+    cv::magnitude(planes[0], planes[1], planes[0]);
+    cv::Mat mag = planes[0];
+
+    mag += cv::Scalar::all(1);
+    cv::log(mag, mag);
+    mag = mag(cv::Rect(0, 0, mag.cols & - 2, mag.rows & -2));
+
+    int c_x = mag.cols / 2;
+    int c_y = mag.rows / 2;
+
+    cv::Rect rect0(0, 0, c_x, c_y);
+    cv::Rect rect1(c_x, 0, c_x, c_y);
+    cv::Rect rect2(0, c_y, c_x, c_y);
+    cv::Rect rect3(c_x, c_y, c_x, c_y);
+
+    cv::Mat q0 = mag(rect0);
+    cv::Mat q1 = mag(rect1);
+    cv::Mat q2 = mag(rect2);
+    cv::Mat q3 = mag(rect3);
+
+    cv::Mat tmp;
+
+    q0.copyTo(tmp);
+    q3.copyTo(q0);
+    tmp.copyTo(q3);
+
+    q1.copyTo(tmp);
+    q2.copyTo(q1);
+    tmp.copyTo(q2);
+
+    cv::normalize(mag, mag, 0, 255, cv::NORM_MINMAX);
+    mag.convertTo(mag, CV_8UC1);
+    out = mag;
+}
+
 }

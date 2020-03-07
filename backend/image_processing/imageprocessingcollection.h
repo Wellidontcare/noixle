@@ -38,6 +38,7 @@ void erode(const JImage& in, JImage& out, cv::Mat strel);
 void integral_image(const JImage &in, JImage &out);
 void laplace(const JImage& in, JImage &out, int size);
 void custom_filter_multi_channel(const JImage in, JImage &out, const JImage &custom_kernel);
+void discrete_fourier_transform(JImage in, JImage& out);
 JImage make_jimage(cv::MatExpr expr);
 void resize(const JImage& in, JImage& out, int width, int height);
 static void custom_filter_single_channel(const cv::Mat &in, cv::Mat &out, const cv::Mat &custom_kernel);

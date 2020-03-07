@@ -74,6 +74,7 @@ public:
     void sqrt();
     void pow();
     void imresize();
+    void imdft();
 
 public slots:
     void execute_command(const QString &command);

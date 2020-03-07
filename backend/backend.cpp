@@ -35,6 +35,7 @@ void Backend::populate_function_lut() {
   function_lut_["div"] = &Backend::div;
   function_lut_["mul"] = &Backend::mul;
   function_lut_["imresize"] = &Backend::imresize;
+  function_lut_["imdft"] = &Backend::imdft;
 
 }
 
@@ -453,9 +454,7 @@ void Backend::add()
     if(std::get<2>(type1) == SCALAR && std::get<2>(type2) == SCALAR){
         throw std::logic_error("Error in " + std::string(__func__) + " this is not a calculator\n the result is " + std::to_string(scalar1 + scalar2) + " btw");
     }
-    if(image1.size != image2.size){
-        throw std::logic_error("Error in " + std::string(__func__) + " image size has to match");
-    }
+
     if(std::get<2>(type1) == SCALAR){
         auto mat = cv::Scalar(scalar1, scalar1, scalar1) + image2;
         active_image = ImageProcessingCollection::make_jimage(mat);
@@ -465,6 +464,9 @@ void Backend::add()
         active_image = ImageProcessingCollection::make_jimage(mat);
     }
     else{
+        if(image1.size != image2.size){
+            throw std::logic_error("Error in " + std::string(__func__) + " image size has to match");
+        }
        auto mat = image1 + image2;
        active_image = ImageProcessingCollection::make_jimage(mat);
     }
@@ -485,9 +487,6 @@ void Backend::sub()
     if(std::get<2>(type1) == SCALAR && std::get<2>(type2) == SCALAR){
         throw std::logic_error("Error in " + std::string(__func__) + " this is not a calculator\n the result is " + std::to_string(scalar1 - scalar2) + " btw");
     }
-    if(image1.size != image2.size){
-        throw std::logic_error("Error in " + std::string(__func__) + " image size has to match");
-    }
     JImage& active_image = get_active_image();
     if(std::get<2>(type1) == SCALAR){
         auto mat = cv::Scalar(scalar1, scalar1, scalar1) - image2;
@@ -498,6 +497,9 @@ void Backend::sub()
        active_image = ImageProcessingCollection::make_jimage(mat);
     }
     else{
+        if(image1.size != image2.size){
+            throw std::logic_error("Error in " + std::string(__func__) + " image size has to match");
+        }
         auto mat = image1 - image2;
        active_image = ImageProcessingCollection::make_jimage(mat);
     }
@@ -515,12 +517,6 @@ void Backend::mul()
     image2.convertTo(image2, CV_64F);
     auto scalar1 = std::get<1>(type1);
     auto scalar2 = std::get<1>(type2);
-    if(std::get<2>(type1) == SCALAR && std::get<2>(type2) == SCALAR){
-        throw std::logic_error("Error in " + std::string(__func__) + " this is not a calculator\n the result is " + std::to_string(scalar1 * scalar2) + " btw");
-    }
-    if(image1.size != image2.size){
-        throw std::logic_error("Error in " + std::string(__func__) + " image size has to match");
-    }
     JImage& active_image = get_active_image();
     if(std::get<2>(type1) == SCALAR){
         auto mat = scalar1 * image2;
@@ -531,6 +527,12 @@ void Backend::mul()
         active_image = ImageProcessingCollection::make_jimage(mat);
     }
     else{
+        if(image1.size != image2.size){
+            throw std::logic_error("Error in " + std::string(__func__) + " image size has to match");
+        }
+        if(std::get<2>(type1) == SCALAR && std::get<2>(type2) == SCALAR){
+            throw std::logic_error("Error in " + std::string(__func__) + " this is not a calculator\n the result is " + std::to_string(scalar1 * scalar2) + " btw");
+        }
         auto mat = image1 * image2;
         active_image = ImageProcessingCollection::make_jimage(mat);
     }
@@ -551,9 +553,6 @@ void Backend::div()
     if(std::get<2>(type1) == SCALAR && std::get<2>(type2) == SCALAR){
         throw std::logic_error("Error in " + std::string(__func__) + " this is not a calculator\n the result is " + std::to_string(scalar1 / scalar2) + " btw");
     }
-    if(image1.size != image2.size){
-        throw std::logic_error("Error in " + std::string(__func__) + " image size has to match");
-    }
     JImage& active_image = get_active_image();
     if(std::get<2>(type1) == SCALAR){
        auto mat = scalar1 / image2;
@@ -564,6 +563,9 @@ void Backend::div()
         active_image = ImageProcessingCollection::make_jimage(mat);
     }
     else{
+        if(image1.size != image2.size){
+            throw std::logic_error("Error in " + std::string(__func__) + " image size has to match");
+        }
         auto mat = image1 / image2;
         active_image = ImageProcessingCollection::make_jimage(mat);
     }
@@ -577,6 +579,14 @@ void Backend::imresize()
     int width = data_.current_args[0].int_arg;
     int height = data_.current_args[1].int_arg;
     ImageProcessingCollection::resize(active_image, active_image, width, height);
+    update_status_bar_on_load();
+    update_view();
+}
+
+void Backend::imdft()
+{
+    JImage& active_image = get_active_image();
+    ImageProcessingCollection::discrete_fourier_transform(active_image, active_image);
     update_status_bar_on_load();
     update_view();
 }

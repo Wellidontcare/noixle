@@ -2,6 +2,9 @@
 
 CalcType CalculationParser::parse_calc_string(QString calc_string)
 {
+    if(calc_string.isNull()){
+        throw std::logic_error("Error in " + std::string(__func__) + " missing input");
+    }
     if(calc_string == "i"){
         return {ACTIVE_IMAGE, 0, 0};
     }
