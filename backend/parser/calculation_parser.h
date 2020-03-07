@@ -2,22 +2,21 @@
 #define CALCULATION_PARSER_H
 #include <backend/image_processing/imageprocessingcollection.h>
 
-enum CalcTypeEnum{
-    ACTIVE_IMAGE,
-    SCALAR,
-    SNAPSHOT
+enum CalcTypeEnum {
+  ACTIVE_IMAGE,
+  SCALAR,
+  SNAPSHOT
 };
-struct CalcType{
-    CalcTypeEnum type;
-    double scalar;
-    int snapshot_index;
+struct CalcType {
+  CalcTypeEnum type;
+  double scalar;
+  int snapshot_index;
 };
 
-class CalculationParser
-{
+class CalculationParser {
 public:
-    CalculationParser() = delete;
-    static CalcType parse_calc_string(QString calc_string);
+  CalculationParser() = delete;
+  static CalcType parse_calc_string(QString calc_string);
 
 };
 
