@@ -88,19 +88,10 @@ std::vector<Command> MainWindow::add_available_commands()
         help_text_.append(QString::fromStdString(c.command) + " " + QString::fromStdString(c.help_text));
     }
     help_text_.append("Use Tab to autocomplete!");
-    help_text_.append("You can zoom with scrolling in and out while pressing Ctrl or by using the + and - keys");
+    help_text_.append("You can zoom with scrolling in and out while pressing Ctrl or Cmd or by using the + and - keys");
+    help_text_.append("You can move the view while being zoomed in by pressing Alt or Option and dragging the mouse");
     help_window_->add_help_text(help_text_);
     return commands;
-}
-
-void MainWindow::keyReleaseEvent(QKeyEvent *event){
-    if(event->key() == Qt::Key_Alt){
-        drag_key_released = true;
-        ui->graphicsView->setDragMode(QGraphicsView::NoDrag);
-    }
-    else{
-        QMainWindow::keyReleaseEvent(event);
-    }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -112,18 +103,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     if(event->key() == Qt::Key_F1){
         backend_->help();
-    }
-    if(event->key() == Qt::Key_Plus){
-        ui->graphicsView->zoom(true, true);
-    }
-    if(event->key() == Qt::Key_Minus){
-        ui->graphicsView->zoom(false, true);
-    }
-    if(event->key() == Qt::Key_Alt){
-        if(drag_key_released){
-            ui->graphicsView->setDragMode(QGraphicsView::ScrollHandDrag);
-            drag_key_released = false;
-        }
     }
     else{
         QMainWindow::keyPressEvent(event);

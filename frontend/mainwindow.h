@@ -24,7 +24,7 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-    bool drag_key_released = true;
+    bool drag_key_released = false;
     HelpWindow* help_window_;
     QStringList options_;
     QStringList help_text_;
@@ -47,7 +47,6 @@ private:
     // QWidget interface
 protected:
     void keyPressEvent(QKeyEvent *event) override;
-    void keyReleaseEvent(QKeyEvent * event) override;
 
     // QWidget interface
 protected:

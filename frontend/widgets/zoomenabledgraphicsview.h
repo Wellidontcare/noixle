@@ -6,6 +6,7 @@
 #include <QMouseEvent>
 #include <QGraphicsItem>
 #include <QApplication>
+#include <QKeyEvent>
 
 #include "mousetrackerpixmapitem.h"
 
@@ -14,6 +15,7 @@ class ZoomEnabledGraphicsView : public QGraphicsView
     Q_OBJECT
     QGraphicsScene scene_;
     MouseTrackerPixmapItem* image_item_ = nullptr;
+    bool drag_key_released = true;
 
 public:
     ZoomEnabledGraphicsView(QWidget* parent = nullptr);
@@ -27,6 +29,11 @@ public slots:
 
 signals:
     void update_status_bar_sig(int, int);
+
+    // QWidget interface
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
+    void keyReleaseEvent(QKeyEvent *event) override;
 };
 
 #endif // ZOOMENABLEDGRAPHICSVIEW_H
