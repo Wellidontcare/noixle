@@ -77,10 +77,10 @@ std::vector<Command> MainWindow::add_available_commands()
         {"imshadingcorrect", {}, true, {}, 0, "| corrects the shading on an image"},
         {"imintegral", {}, true, {}, 0, "| calcuates the integralimage of the active image"},
         {"imresize", {}, false, {INT, INT}, 2, " [width, heigh] | resize image to give arguments"},
-        {"sub", {}, false, {STRING, STRING},2, "[a b] | subtract b from a, image or scalar, i is active image, s marks snaphot images Example: sub s1 s2"},
-        {"add", {}, false, {STRING, STRING},2, "[a b] |add b to a, image or scalar, i is active image, s marks snaphot images Example: add i 25"},
-        {"mul", {}, false, {STRING, STRING},2, "[a b] | multiply a with b, image or scalar, i is active image, s marks snaphot images Example: mul s1 2"},
-        {"div", {}, false, {STRING, STRING},2, "[a b] | divide a by b, image or scalar, i is active image, s marks snaphot images Example: div s2 s1"},
+        {"sub", {}, false, {STRING, STRING}, 2, "[a b] | subtract b from a, image or scalar, i is active image, s marks snaphot images Example: sub s1 s2"},
+        {"add", {}, false, {STRING, STRING}, 2, "[a b] |add b to a, image or scalar, i is active image, s marks snaphot images Example: add i 25"},
+        {"mul", {}, false, {STRING, STRING}, 2, "[a b] | multiply a with b, image or scalar, i is active image, s marks snaphot images Example: mul s1 2"},
+        {"div", {}, false, {STRING, STRING}, 2, "[a b] | divide a by b, image or scalar, i is active image, s marks snaphot images Example: div s2 s1"},
         {"imdft", {}, true, {}, 0, "| shows the spectral domain of the image"}
     };
     for(const Command& c : commands){
@@ -88,19 +88,10 @@ std::vector<Command> MainWindow::add_available_commands()
         help_text_.append(QString::fromStdString(c.command) + " " + QString::fromStdString(c.help_text));
     }
     help_text_.append("Use Tab to autocomplete!");
-    help_text_.append("You can zoom with scrolling in and out while pressing Ctrl or by using the + and - keys");
+    help_text_.append("You can zoom with scrolling in and out while pressing Ctrl or Cmd or by using the + and - keys");
+    help_text_.append("You can move the view while being zoomed in by pressing Alt or Option and dragging the mouse");
     help_window_->add_help_text(help_text_);
     return commands;
-}
-
-void MainWindow::keyReleaseEvent(QKeyEvent *event){
-    if(event->key() == Qt::Key_Alt){
-        drag_key_released = true;
-        ui->graphicsView->setDragMode(QGraphicsView::NoDrag);
-    }
-    else{
-        QMainWindow::keyReleaseEvent(event);
-    }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -112,18 +103,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     if(event->key() == Qt::Key_F1){
         backend_->help();
-    }
-    if(event->key() == Qt::Key_Plus){
-        ui->graphicsView->zoom(true, true);
-    }
-    if(event->key() == Qt::Key_Minus){
-        ui->graphicsView->zoom(false, true);
-    }
-    if(event->key() == Qt::Key_Alt){
-        if(drag_key_released){
-            ui->graphicsView->setDragMode(QGraphicsView::ScrollHandDrag);
-            drag_key_released = false;
-        }
     }
     else{
         QMainWindow::keyPressEvent(event);

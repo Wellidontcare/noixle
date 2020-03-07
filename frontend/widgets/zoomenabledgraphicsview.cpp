@@ -5,6 +5,7 @@ ZoomEnabledGraphicsView::ZoomEnabledGraphicsView(QWidget *parent)
 {
     setMouseTracking(true);
     setScene(&scene_);
+    drag_key_released = true;
 }
 
 void ZoomEnabledGraphicsView::update_image(const QImage &image)
@@ -39,7 +40,12 @@ void ZoomEnabledGraphicsView::zoom(bool zoom_in, bool fast_zoom)
     else{
         zoom_step = fast_zoom ? 1/1.5 : 1/1.1;
     }
-    this->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+    if(!fast_zoom){
+        this->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+    }
+    else{
+        this->setTransformationAnchor(QGraphicsView::AnchorViewCenter);
+    }
     this->scale(zoom_step, zoom_step);
 }
 
@@ -55,5 +61,33 @@ void ZoomEnabledGraphicsView::wheelEvent(QWheelEvent *event)
         else{
             zoom(out, !fast_zoom);
         }
+    }
+}
+
+void ZoomEnabledGraphicsView::keyPressEvent(QKeyEvent *event){
+    if(event->key() == Qt::Key_Plus){
+        zoom(true, true);
+    }
+    else if(event->key() == Qt::Key_Minus){
+        zoom(false, true);
+    }
+    else if(event->key() == Qt::Key_Alt){
+        if(drag_key_released){
+            setDragMode(ScrollHandDrag);
+            drag_key_released = false;
+        }
+    }
+    else{
+        QGraphicsView::keyPressEvent(event);
+    }
+}
+
+void ZoomEnabledGraphicsView::keyReleaseEvent(QKeyEvent *event){
+    if(event->key() == Qt::Key_Alt){
+        drag_key_released = true;
+        setDragMode(NoDrag);
+    }
+    else{
+        QGraphicsView::keyReleaseEvent(event);
     }
 }
