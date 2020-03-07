@@ -49,7 +49,7 @@ void Backend::set_args(const std::vector<Arg> &args) {
   data_.current_args = args;
 }
 
-static JImage Backend::get_snapshot_by_index(int idx) {
+JImage Backend::get_snapshot_by_index(int idx) {
   QString tmp_file_path = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
   QString snaphot_img_path = tmp_file_path + "/Snapshot" + QString::number(idx) + ".tif";
   if (!QFile(snaphot_img_path).exists()) {
