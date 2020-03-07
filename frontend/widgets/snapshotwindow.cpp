@@ -8,7 +8,9 @@ SnapshotViewer::SnapshotViewer(QWidget *parent) :
 {
     ui->setupUi(this);
     setTabsClosable(false);
+    setWindowFlag(Qt::Window);
 }
+
 
 SnapshotViewer::~SnapshotViewer()
 {

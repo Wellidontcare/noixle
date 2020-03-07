@@ -3,10 +3,10 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    ,help_window_(new HelpWindow(this))
+    ,help_window_(new HelpWindow())
     ,options_()
     ,backend_(new Backend(add_available_commands(), parent))
-    ,snapshot_viewer_(new SnapshotViewer(this))
+    ,snapshot_viewer_(new SnapshotViewer())
     ,histogram_viewer_(new HistogramViewer(this))
     ,binarize_window_(new BinarizeWindow(this))
     ,ui(new Ui::MainWindow)
@@ -66,7 +66,7 @@ std::vector<Command> MainWindow::add_available_commands()
         {"snapshot", {}, true, {}, 0, "| saves the image as snapshot and displays it in a new tab-window"},
         {"load_snapshot", {}, true, {INT}, 1, " | loads the selected snapshot"},
         {"iminvert", {}, true, {}, 0, "| inverts the currently opened image"},
-        {"imfilter", {}, false, {STRING, INT}, 2, "['median' | 'gaussian' | 'binomial' | 'sobel' | 'dilate' | 'erode' | 'laplace'] size | applies filter kernel to current image"},
+        {"imfilter", {}, true, {STRING}, 1, "['median' | 'gaussian' | 'bilateral' | 'sobel' | 'dilate' | 'erode' | 'laplace'] | applies filter kernel to current image. no argument is custom Kernel"},
         {"imcconvert", {}, false, {STRING}, 1, "[gray | color] | converts the active image to the specified mode"},
         {"histogram", {}, true, {STRING}, 1, "['cumulative'] | displays a histogram of the currently viewed image"},
         {"imequalize", {}, true, {}, 0, "| improves the image contrast by equalizing the histogram"},
@@ -75,7 +75,13 @@ std::vector<Command> MainWindow::add_available_commands()
         {"imrotate", {}, false, {INT}, 1, "[angle in deg] | rotates the active image by the given angle to the left"},
         {"impixelize", {}, false, {INT}, 1, "[pixelsize] | pixelizes the active image"},
         {"imshadingcorrect", {}, true, {}, 0, "| corrects the shading on an image"},
-        {"imintegral", {}, true, {}, 0, "| calcuates the integralimage of the active image"}
+        {"imintegral", {}, true, {}, 0, "| calcuates the integralimage of the active image"},
+        {"imresize", {}, false, {INT, INT}, 2, " [width, heigh] | resize image to give arguments"},
+        {"sub", {}, false, {STRING, STRING},2, "[a b] | subtract b from a, image or scalar, i is active image, s marks snaphot images Example: sub s1 s2"},
+        {"add", {}, false, {STRING, STRING},2, "[a b] |add b to a, image or scalar, i is active image, s marks snaphot images Example: add i 25"},
+        {"mul", {}, false, {STRING, STRING},2, "[a b] | multiply a with b, image or scalar, i is active image, s marks snaphot images Example: mul s1 2"},
+        {"div", {}, false, {STRING, STRING},2, "[a b] | divide a by b, image or scalar, i is active image, s marks snaphot images Example: div s2 s1"},
+        {"imdft", {}, true, {}, 0, "| shows the spectral domain of the image"}
     };
     for(const Command& c : commands){
         options_.append(QString::fromStdString(c.command));
@@ -87,6 +93,21 @@ std::vector<Command> MainWindow::add_available_commands()
     return commands;
 }
 
+void MainWindow::keyReleaseEvent(QKeyEvent *event){
+    if(event->key() == Qt::Key_Alt){
+        drag_key_released = true;
+        ui->graphicsView->setDragMode(QGraphicsView::NoDrag);
+    }
+    else{
+        QMainWindow::keyReleaseEvent(event);
+    }
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    qApp->closeAllWindows();
+    event->accept();
+}
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     if(event->key() == Qt::Key_F1){
@@ -97,6 +118,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     }
     if(event->key() == Qt::Key_Minus){
         ui->graphicsView->zoom(false, true);
+    }
+    if(event->key() == Qt::Key_Alt){
+        if(drag_key_released){
+            ui->graphicsView->setDragMode(QGraphicsView::ScrollHandDrag);
+            drag_key_released = false;
+        }
     }
     else{
         QMainWindow::keyPressEvent(event);

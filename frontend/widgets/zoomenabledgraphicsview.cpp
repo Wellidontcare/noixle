@@ -5,7 +5,6 @@ ZoomEnabledGraphicsView::ZoomEnabledGraphicsView(QWidget *parent)
 {
     setMouseTracking(true);
     setScene(&scene_);
-    setDragMode(ScrollHandDrag);
 }
 
 void ZoomEnabledGraphicsView::update_image(const QImage &image)
@@ -57,9 +56,4 @@ void ZoomEnabledGraphicsView::wheelEvent(QWheelEvent *event)
             zoom(out, !fast_zoom);
         }
     }
-}
-
-void ZoomEnabledGraphicsView::adjust_on_resize()
-{
-    fitInView(scene_.itemsBoundingRect(), Qt::KeepAspectRatio);
 }

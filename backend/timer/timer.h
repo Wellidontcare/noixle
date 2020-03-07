@@ -5,17 +5,16 @@
 #include <QString>
 #include <chrono>
 
-class Timer : public QObject
-{
-    Q_OBJECT
-    std::chrono::high_resolution_clock::time_point start_time;
+class Timer : public QObject {
+Q_OBJECT
+  std::chrono::high_resolution_clock::time_point start_time;
 
 public:
-    explicit Timer(QObject *parent = nullptr);
-    ~Timer();
+  explicit Timer(QObject *parent = nullptr);
+  ~Timer();
 
 signals:
-    void measured_time(QString);
+  void measured_time(QString);
 
 public slots:
 };
