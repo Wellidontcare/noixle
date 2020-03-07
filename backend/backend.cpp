@@ -437,7 +437,6 @@ void Backend::imintegral() {
 }
 
 void Backend::add() {
-  JImage &active_image = get_active_image();
   auto type1 =
       get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[0].string_arg.c_str()));
   auto type2 =
@@ -452,7 +451,7 @@ void Backend::add() {
     throw std::logic_error("Error in " + std::string(__func__) + " this is not a calculator\n the result is "
                                + std::to_string(scalar1 + scalar2) + " btw");
   }
-
+  JImage &active_image = get_active_image();
   if (std::get<2>(type1) == SCALAR) {
     auto mat = cv::Scalar(scalar1, scalar1, scalar1) + image2;
     active_image = ImageProcessingCollection::make_jimage(mat);
