@@ -3,10 +3,10 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    ,help_window_(new HelpWindow(this))
+    ,help_window_(new HelpWindow())
     ,options_()
     ,backend_(new Backend(add_available_commands(), parent))
-    ,snapshot_viewer_(new SnapshotViewer(this))
+    ,snapshot_viewer_(new SnapshotViewer())
     ,histogram_viewer_(new HistogramViewer(this))
     ,binarize_window_(new BinarizeWindow(this))
     ,ui(new Ui::MainWindow)
@@ -76,11 +76,11 @@ std::vector<Command> MainWindow::add_available_commands()
         {"impixelize", {}, false, {INT}, 1, "[pixelsize] | pixelizes the active image"},
         {"imshadingcorrect", {}, true, {}, 0, "| corrects the shading on an image"},
         {"imintegral", {}, true, {}, 0, "| calcuates the integralimage of the active image"},
+        {"imresize", {}, false, {INT, INT}, 2, " [width, heigh] | resize image to give arguments"},
         {"sub", {}, false, {STRING, STRING},2, "[a b] | subtract b from a, image or scalar, i is active image, s marks snaphot images Example: sub s1 s2"},
         {"add", {}, false, {STRING, STRING},2, "[a b] |add b to a, image or scalar, i is active image, s marks snaphot images Example: add i 25"},
         {"mul", {}, false, {STRING, STRING},2, "[a b] | multiply a with b, image or scalar, i is active image, s marks snaphot images Example: mul s1 2"},
-        {"div", {}, false, {STRING, STRING},2, "[a b] | divide a by b, image or scalar, i is active image, s marks snaphot images Example: div s2 s1"},
-        {"resize", {}, false, {INT, INT}, 2, " [width, heigh] | resize image to give arguments"}
+        {"div", {}, false, {STRING, STRING},2, "[a b] | divide a by b, image or scalar, i is active image, s marks snaphot images Example: div s2 s1"}
     };
     for(const Command& c : commands){
         options_.append(QString::fromStdString(c.command));
@@ -100,6 +100,12 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event){
     else{
         QMainWindow::keyReleaseEvent(event);
     }
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    qApp->closeAllWindows();
+    event->accept();
 }
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {

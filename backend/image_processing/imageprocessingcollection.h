@@ -39,6 +39,7 @@ void integral_image(const JImage &in, JImage &out);
 void laplace(const JImage& in, JImage &out, int size);
 void custom_filter_multi_channel(const JImage in, JImage &out, const JImage &custom_kernel);
 JImage make_jimage(cv::MatExpr expr);
+void resize(const JImage& in, JImage& out, int width, int height);
 static void custom_filter_single_channel(const cv::Mat &in, cv::Mat &out, const cv::Mat &custom_kernel);
 static void pixelize_single_channel(cv::Mat &in, int pixel_size);
 }

@@ -34,6 +34,7 @@ void Backend::populate_function_lut() {
   function_lut_["sub"] = &Backend::sub;
   function_lut_["div"] = &Backend::div;
   function_lut_["mul"] = &Backend::mul;
+  function_lut_["imresize"] = &Backend::imresize;
 
 }
 
@@ -566,6 +567,16 @@ void Backend::div()
         auto mat = image1 / image2;
         active_image = ImageProcessingCollection::make_jimage(mat);
     }
+    update_status_bar_on_load();
+    update_view();
+}
+
+void Backend::imresize()
+{
+    JImage& active_image = get_active_image();
+    int width = data_.current_args[0].int_arg;
+    int height = data_.current_args[1].int_arg;
+    ImageProcessingCollection::resize(active_image, active_image, width, height);
     update_status_bar_on_load();
     update_view();
 }

@@ -396,4 +396,9 @@ JImage make_jimage(cv::MatExpr expr)
  return JImage(mat);
 }
 
+void resize(const JImage &in, JImage &out, int width, int height)
+{
+    cv::resize(in, out, {width, height});
+}
+
 }

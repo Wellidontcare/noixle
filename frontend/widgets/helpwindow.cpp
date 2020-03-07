@@ -6,7 +6,7 @@ HelpWindow::HelpWindow(QWidget *parent) :
     help_text_(nullptr),
     ui(new Ui::HelpWindow)
 {
-    setWindowFlag(Qt::Window);
+    setWindowFlags(Qt::Window);
     ui->setupUi(this);
     ui->listView->setEditTriggers(QAbstractItemView::EditTrigger::NoEditTriggers);
 }
