@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <QMessageBox>
 #include <unordered_map>
 #include <utility>
 
@@ -73,6 +74,7 @@ public:
   void imdft();
   void merge();
   void clear();
+  void echo();
 
 public slots:
   void execute_command(const QString &command);

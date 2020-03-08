@@ -26,7 +26,7 @@ cv::Mat FilterParser::get_custom_kernel() {
 }
 
 int FilterParser::get_kernel_size() {
-  int size = QInputDialog::getInt(nullptr, "Kernel size", "Please input the kernel size", 1, 1);
+  int size = QInputDialog::getInt(nullptr, "Kernel size", "Please input the kernel size", -1, -1);
   if (!(size % 2)) {
     throw std::logic_error("Error in " + std::string(__func__) + " even kernel size is not supported");
   }

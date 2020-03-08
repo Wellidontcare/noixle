@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <QString>
 #include <vector>
 
 #include "command.h"

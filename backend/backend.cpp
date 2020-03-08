@@ -38,6 +38,7 @@ void Backend::populate_function_lut() {
   function_lut_["imdft"] = &Backend::imdft;
   function_lut_["immerge"] = &Backend::merge;
   function_lut_["clear"] = &Backend::clear;
+  function_lut_["echo"] = &Backend::echo;
 }
 
 void Backend::backup() {
@@ -623,6 +624,12 @@ void Backend::clear()
     update_view();
     update_status_bar_on_load();
     emit clear_sig();
+}
+
+void Backend::echo()
+{
+    QString message = data_.current_args[0].string_arg.c_str();
+    QMessageBox::information(parent_, "Info", message);
 }
 
 void Backend::execute_command(const QString &command) {

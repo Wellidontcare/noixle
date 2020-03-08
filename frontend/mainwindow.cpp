@@ -76,6 +76,7 @@ std::vector<Command> MainWindow::add_available_commands()
 {
     std::vector<Command> commands = {
         {"help", {}, true, {}, 0, "| shows this message"},
+        {"echo", {}, false, {STRING}, 1, " | displays a message to the user"},
         {"open", {}, true, {STRING}, 1, "[file_path (optional)] | opens an image"},
         {"save", {}, true, {}, 1, "[file_path (optional)] | saves the currently opened image"},
         {"exit", {}, true, {}, 0, "| exits the programm"},

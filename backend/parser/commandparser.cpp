@@ -10,8 +10,16 @@ Command CommandParser::parse(const char *input) {
   std::vector<Arg> args;
   input_stream >> command;
   std::string arg;
+  if(command == "echo"){
+      QString echo_str = input_stream.str().c_str();
+      echo_str = echo_str.remove(0, 4);
+      args.emplace_back(Arg{0, 0, echo_str.toStdString()});
+  }
+  else{
+
   while (input_stream >> arg) {
     args.emplace_back(Arg{0, 0, arg});
+  }
   }
   auto available_command =
       std::find_if(available_commands_.begin(),
@@ -26,7 +34,7 @@ Command CommandParser::parse(const char *input) {
     if (current_arg_count < max_arg_count && !available_command->null_argument_callable) {
       throw std::logic_error("Error in " + std::string(__func__) + "\nThis command requires more arguments");
     }
-    if (has_correct_types(*available_command, args)) {
+    if (has_correct_types(*available_command, args) || command == "echo") {
       Command ret_command(*available_command);
       ret_command.args = args;
       return ret_command;
