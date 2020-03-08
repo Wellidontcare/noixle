@@ -207,8 +207,9 @@ void Backend::record() {
     auto doc_location = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     QString filename = QFileDialog::getSaveFileName(nullptr, "Select location to save macro", doc_location);
     std::fstream save_file(filename.toStdString(), std::ios::app);
-    for (int i = data_.record_start_index; i < data_.record_stop_index; ++i) {
-      save_file << data_.command_history[i].toStdString() << '\n';
+    save_file << data_.command_history[data_.record_start_index].toStdString();
+    for (int i = data_.record_start_index + 1; i < data_.record_stop_index; ++i) {
+      save_file << '\n' << data_.command_history[i].toStdString();
     }
   } else {
     throw std::logic_error("Error in " + std::string(__func__) + "\nInvalid arguments provided!");
