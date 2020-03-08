@@ -28,11 +28,24 @@ MainWindow::MainWindow(QWidget *parent)
     connect(backend_, &Backend::histogram_updated_sig, histogram_viewer_, &HistogramViewer::show_histogram);
     connect(backend_, &Backend::binarize_wizard_sig, binarize_window_, &BinarizeWindow::show_binarize_wizard);
     connect(binarize_window_, &BinarizeWindow::thresh_hist_sig, histogram_viewer_, &HistogramViewer::show_histogram);
+    connect(backend_, &Backend::clear_sig, this, &MainWindow::clear);
 }
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete backend_;
+    snapshot_viewer_->clear_action();
+    if(snapshot_viewer_){
+        delete snapshot_viewer_;
+    }
+    if(binarize_window_){
+        delete binarize_window_;
+    }
+    if(backend_){
+        delete backend_;
+    }
+    if(histogram_viewer_){
+        delete histogram_viewer_;
+    }
 }
 
 void MainWindow::execute_command(const QString &command)
@@ -51,14 +64,24 @@ void MainWindow::show_performance_info(const QString &performance_info)
     }
 }
 
+void MainWindow::clear()
+{
+    snapshot_viewer_->clear_action();
+    snapshot_viewer_->close();
+    help_window_->close();
+    binarize_window_->close();
+}
+
 std::vector<Command> MainWindow::add_available_commands()
 {
     std::vector<Command> commands = {
         {"help", {}, true, {}, 0, "| shows this message"},
+        {"echo", {}, false, {STRING}, 1, " | displays a message to the user"},
         {"open", {}, true, {STRING}, 1, "[file_path (optional)] | opens an image"},
         {"save", {}, true, {}, 1, "[file_path (optional)] | saves the currently opened image"},
         {"exit", {}, true, {}, 0, "| exits the programm"},
         {"revert", {}, true, {}, 0, " | reverts back to last state"},
+        {"clear", {}, true, {}, 0, "| clear everything"},
         {"toggle_perf_measurement",{}, true, {}, 0, " | toggles the performance measurement"},
         {"history", {}, true, {}, 0, "| shows the command history"},
         {"record", {}, false, {STRING}, 1, "[start | stop] | starts or stops the command recording"},
@@ -77,11 +100,12 @@ std::vector<Command> MainWindow::add_available_commands()
         {"imshadingcorrect", {}, true, {}, 0, "| corrects the shading on an image"},
         {"imintegral", {}, true, {}, 0, "| calcuates the integralimage of the active image"},
         {"imresize", {}, false, {INT, INT}, 2, " [width, heigh] | resize image to give arguments"},
-        {"sub", {}, false, {STRING, STRING}, 2, "[a b] | subtract b from a, image or scalar, i is active image, s marks snaphot images Example: sub s1 s2"},
-        {"add", {}, false, {STRING, STRING}, 2, "[a b] |add b to a, image or scalar, i is active image, s marks snaphot images Example: add i 25"},
-        {"mul", {}, false, {STRING, STRING}, 2, "[a b] | multiply a with b, image or scalar, i is active image, s marks snaphot images Example: mul s1 2"},
-        {"div", {}, false, {STRING, STRING}, 2, "[a b] | divide a by b, image or scalar, i is active image, s marks snaphot images Example: div s2 s1"},
-        {"imdft", {}, true, {}, 0, "| shows the spectral domain of the image"}
+        {"sub", {}, false, {STRING, STRING},2, "[a b] | subtract b from a, image or scalar, i is active image, s marks snaphot images Example: sub s1 s2"},
+        {"add", {}, false, {STRING, STRING},2, "[a b] | add b to a, image or scalar, i is active image, s marks snaphot images Example: add i 25"},
+        {"mul", {}, false, {STRING, STRING},2, "[a b] | multiply a with b, image or scalar, i is active image, s marks snaphot images Example: mul s1 2"},
+        {"div", {}, false, {STRING, STRING},2, "[a b] | divide a by b, image or scalar, i is active image, s marks snaphot images Example: div s2 s1"},
+        {"imdft", {}, true, {}, 0, "| shows the spectral domain of the image"},
+        {"immerge", {}, false, {STRING, STRING, STRING}, 3, "[channel1 channel2 channel3] | merge channels, i is active image, s marks snaphot images Example: merge s0 s3"}
     };
     for(const Command& c : commands){
         options_.append(QString::fromStdString(c.command));

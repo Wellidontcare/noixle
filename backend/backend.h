@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <QMessageBox>
 #include <unordered_map>
 #include <utility>
 
@@ -71,6 +72,9 @@ public:
   void div();
   void imresize();
   void imdft();
+  void merge();
+  void clear();
+  void echo();
 
 public slots:
   void execute_command(const QString &command);
@@ -91,6 +95,7 @@ signals:
   void histogram_updated_sig(QImage);
   void show_threshold_sig(int);
   void binarize_wizard_sig(JImage);
+  void clear_sig();
 
 private:
   void save_to_history(const QString &command, const QString &args);

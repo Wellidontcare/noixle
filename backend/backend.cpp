@@ -36,7 +36,9 @@ void Backend::populate_function_lut() {
   function_lut_["mul"] = &Backend::mul;
   function_lut_["imresize"] = &Backend::imresize;
   function_lut_["imdft"] = &Backend::imdft;
-
+  function_lut_["immerge"] = &Backend::merge;
+  function_lut_["clear"] = &Backend::clear;
+  function_lut_["echo"] = &Backend::echo;
 }
 
 void Backend::backup() {
@@ -152,7 +154,7 @@ void Backend::load_snapshot() {
     set_args({construct_arg(snapshot_img_path)});
     open();
   }
-
+  save_to_history("load_snapshot", QString::number(indx));
 }
 
 void Backend::iminvert() {
@@ -205,8 +207,9 @@ void Backend::record() {
     auto doc_location = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     QString filename = QFileDialog::getSaveFileName(nullptr, "Select location to save macro", doc_location);
     std::fstream save_file(filename.toStdString(), std::ios::app);
-    for (int i = data_.record_start_index; i < data_.record_stop_index; ++i) {
-      save_file << data_.command_history[i].toStdString() << '\n';
+    save_file << data_.command_history[data_.record_start_index].toStdString();
+    for (int i = data_.record_start_index + 1; i < data_.record_stop_index; ++i) {
+      save_file << '\n' << data_.command_history[i].toStdString();
     }
   } else {
     throw std::logic_error("Error in " + std::string(__func__) + "\nInvalid arguments provided!");
@@ -252,49 +255,81 @@ void Backend::imfilter() {
     if (kernel.empty()) {
       return;
     }
+    {
     TIME_THIS
     ImageProcessingCollection::custom_filter_multi_channel(active_image, active_image, kernel);
+    }
+    save_to_history("imfilter", "");
     break;
   }
   case MEDIAN: {
     int size = FilterParser::get_kernel_size();
+    if(size < 0){
+        size = 3;
+    }
+    {
     TIME_THIS
     ImageProcessingCollection::median(active_image, active_image, size);
+    }
+    save_to_history("imfilter", "median");
     break;
   }
   case GAUSSIAN: {
     cv::Size size = FilterParser::get_kernel_size_xy();
     double sigma = FilterParser::get_sigma();
+    {
     TIME_THIS
     ImageProcessingCollection::gaussian(active_image, active_image, size, sigma);
+    }
+    save_to_history("imfilter", "gaussian");
     break;
   }
   case BILATERAL: {
     double sigma_color = FilterParser::get_sigma();
     double sigma_space = FilterParser::get_sigma();
+    {
     TIME_THIS
     ImageProcessingCollection::bilateral(active_image, active_image, sigma_color, sigma_space);
+    }
+    save_to_history("imfilter", "bilateral");
     break;
   }
   case SOBEL: {
+    //C++ 17 structured binding
     auto[x_order, y_order] = FilterParser::get_xy_order();
     int size = FilterParser::get_kernel_size();
+    {
     TIME_THIS
     ImageProcessingCollection::sobel(active_image, active_image, x_order, y_order, size);
+    }
+    save_to_history("imfilter", "sobel");
     break;
   }
   case DILATE: {
     cv::Mat strel = FilterParser::get_strel();
+    {
+    TIME_THIS
     ImageProcessingCollection::dilate(active_image, active_image, strel);
+    }
+    save_to_history("imfilter", "dilate");
     break;
   }
   case ERODE: {
     cv::Mat strel = FilterParser::get_strel();
+    {
+    TIME_THIS
+    ImageProcessingCollection::erode(active_image, active_image, strel);
+    }
+    save_to_history("imfilter", "erode");
     break;
   }
   case LAPLACE: {
     int size = FilterParser::get_kernel_size();
+    {
+    TIME_THIS
     ImageProcessingCollection::laplace(active_image, active_image, size);
+    }
+    save_to_history("imfilter", "laplace");
     break;
   }
   }
@@ -331,6 +366,7 @@ void Backend::histogram() {
       JImage hist;
       ImageProcessingCollection::histogram(data_.active_image, hist, true);
       emit histogram_updated_sig(hist.as_qimage());
+      save_to_history("histogram", "");
       return;
     }
   }
@@ -356,6 +392,7 @@ void Backend::imcconvert() {
     TIME_THIS
     ImageProcessingCollection::convert_color(active_image, active_image, color);
   }
+  save_to_history("imcconvert", data_.current_args[0].string_arg.c_str());
   emit image_updated_sig(active_image.as_qimage());
   update_status_bar_on_load();
 }
@@ -366,6 +403,7 @@ void Backend::imequalize() {
     TIME_THIS
     ImageProcessingCollection::equalize(active_image, active_image);
   }
+  save_to_history("imequalize", "");
   update_view();
 }
 
@@ -377,11 +415,13 @@ void Backend::imgammacorrect() {
                                              active_image,
                                              data_.current_args[0].float_arg);
   }
+  save_to_history("imgammacorrect", QString::number(data_.current_args[0].float_arg));
   update_view();
 }
 
 void Backend::imbinarize() {
   if (data_.current_args.empty()) {
+    save_to_history("imbinarize", "");
     emit binarize_wizard_sig(data_.active_image);
     return;
   }
@@ -394,6 +434,7 @@ void Backend::imbinarize() {
     TIME_THIS
     ImageProcessingCollection::binarize(active_image, active_image, threshold);
   }
+  save_to_history("imbinarize", QString::number(data_.current_args[0].int_arg));
   emit show_threshold_sig(threshold);
   update_view();
 }
@@ -402,6 +443,7 @@ void Backend::imrotate() {
   JImage &active_image = get_active_image();
   int angle = data_.current_args[0].int_arg;
   ImageProcessingCollection::rotate(active_image, active_image, angle);
+  save_to_history("imrotate", QString::number(angle));
   update_status_bar_on_load();
   update_view();
 }
@@ -413,6 +455,7 @@ void Backend::impixelize() {
     TIME_THIS
     ImageProcessingCollection::pixelize(active_image, active_image, pixel_size);
   }
+  save_to_history("impixelize", QString::number(pixel_size));
   update_status_bar_on_load();
   update_view();
 }
@@ -423,6 +466,7 @@ void Backend::imshadingcorrect() {
     TIME_THIS
     ImageProcessingCollection::shading_correct(active_image, active_image);
   }
+  save_to_history("imshadingcorrect", "");
   update_view();
 }
 
@@ -432,6 +476,7 @@ void Backend::imintegral() {
     TIME_THIS
     ImageProcessingCollection::integral_image(active_image, active_image);
   }
+  save_to_history("imintegral", "");
   update_status_bar_on_load();
   update_view();
 }
@@ -441,12 +486,12 @@ void Backend::add() {
       get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[0].string_arg.c_str()));
   auto type2 =
       get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[1].string_arg.c_str()));
-  auto image1 = std::get<0>(type1);
-  auto image2 = std::get<0>(type2);
+  JImage image1 = std::get<0>(type1);
+  JImage image2 = std::get<0>(type2);
   image1.convertTo(image1, CV_64F);
   image2.convertTo(image2, CV_64F);
-  auto scalar1 = std::get<1>(type1);
-  auto scalar2 = std::get<1>(type2);
+  double scalar1 = std::get<1>(type1);
+  double scalar2 = std::get<1>(type2);
   if (std::get<2>(type1) == SCALAR && std::get<2>(type2) == SCALAR) {
     throw std::logic_error("Error in " + std::string(__func__) + " this is not a calculator\n the result is "
                                + std::to_string(scalar1 + scalar2) + " btw");
@@ -456,15 +501,16 @@ void Backend::add() {
     auto mat = cv::Scalar(scalar1, scalar1, scalar1) + image2;
     active_image = ImageProcessingCollection::make_jimage(mat);
   } else if (std::get<2>(type2) == SCALAR) {
-    auto mat = image1 + cv::Scalar(scalar2, scalar2, scalar2);
+    cv::MatExpr mat = image1 + cv::Scalar(scalar2, scalar2, scalar2);
     active_image = ImageProcessingCollection::make_jimage(mat);
   } else {
     if (image1.size != image2.size) {
       throw std::logic_error("Error in " + std::string(__func__) + " image size has to match");
     }
-    auto mat = image1 + image2;
+    cv::MatExpr mat = image1 + image2;
     active_image = ImageProcessingCollection::make_jimage(mat);
   }
+  save_to_history("add", (data_.current_args[0].string_arg + " " + data_.current_args[1].string_arg).c_str());
   update_status_bar_on_load();
   update_view();
 }
@@ -474,12 +520,12 @@ void Backend::sub() {
       get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[0].string_arg.c_str()));
   auto type2 =
       get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[1].string_arg.c_str()));
-  auto image1 = std::get<0>(type1);
-  auto image2 = std::get<0>(type2);
+  JImage image1 = std::get<0>(type1);
+  JImage image2 = std::get<0>(type2);
   image1.convertTo(image1, CV_64F);
   image2.convertTo(image2, CV_64F);
-  auto scalar1 = std::get<1>(type1);
-  auto scalar2 = std::get<1>(type2);
+  double scalar1 = std::get<1>(type1);
+  double scalar2 = std::get<1>(type2);
   if (std::get<2>(type1) == SCALAR && std::get<2>(type2) == SCALAR) {
     throw std::logic_error("Error in " + std::string(__func__) + " this is not a calculator\n the result is "
                                + std::to_string(scalar1 - scalar2) + " btw");
@@ -498,6 +544,7 @@ void Backend::sub() {
     auto mat = image1 - image2;
     active_image = ImageProcessingCollection::make_jimage(mat);
   }
+  save_to_history("sub", (data_.current_args[0].string_arg + " " + data_.current_args[1].string_arg).c_str());
   update_status_bar_on_load();
   update_view();
 }
@@ -507,12 +554,12 @@ void Backend::mul() {
       get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[0].string_arg.c_str()));
   auto type2 =
       get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[1].string_arg.c_str()));
-  auto image1 = std::get<0>(type1);
-  auto image2 = std::get<0>(type2);
+  JImage image1 = std::get<0>(type1);
+  JImage image2 = std::get<0>(type2);
   image1.convertTo(image1, CV_64F);
   image2.convertTo(image2, CV_64F);
-  auto scalar1 = std::get<1>(type1);
-  auto scalar2 = std::get<1>(type2);
+  double scalar1 = std::get<1>(type1);
+  double scalar2 = std::get<1>(type2);
   if (std::get<2>(type1) == SCALAR && std::get<2>(type2) == SCALAR) {
     throw std::logic_error("Error in " + std::string(__func__) + " this is not a calculator\n the result is "
                                + std::to_string(scalar1 * scalar2) + " btw");
@@ -522,15 +569,20 @@ void Backend::mul() {
     auto mat = scalar1 * image2;
     active_image = ImageProcessingCollection::make_jimage(mat);
   } else if (std::get<2>(type2) == SCALAR) {
-    auto mat = image1 * scalar2;
+    cv::MatExpr mat = image1 * scalar2;
     active_image = ImageProcessingCollection::make_jimage(mat);
   } else {
     if (image1.size != image2.size) {
       throw std::logic_error("Error in " + std::string(__func__) + " image size has to match");
     }
-    auto mat = image1 * image2;
+    if(image1.channels() > 1 || image2.channels() > 1){
+        throw std::logic_error("Error in " + std::string(__func__) + " images have to be grayscale");
+
+    }
+    cv::MatExpr mat = image1 * image2;
     active_image = ImageProcessingCollection::make_jimage(mat);
   }
+  save_to_history("mul", (data_.current_args[0].string_arg + " " + data_.current_args[1].string_arg).c_str());
   update_status_bar_on_load();
   update_view();
 }
@@ -540,48 +592,102 @@ void Backend::div() {
       get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[0].string_arg.c_str()));
   auto type2 =
       get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[1].string_arg.c_str()));
-  auto image1 = std::get<0>(type1);
-  auto image2 = std::get<0>(type2);
+  JImage image1 = std::get<0>(type1);
+  JImage image2 = std::get<0>(type2);
   image1.convertTo(image1, CV_64F);
   image2.convertTo(image2, CV_64F);
-  auto scalar1 = std::get<1>(type1);
-  auto scalar2 = std::get<1>(type2);
+  double scalar1 = std::get<1>(type1);
+  double scalar2 = std::get<1>(type2);
   if (std::get<2>(type1) == SCALAR && std::get<2>(type2) == SCALAR) {
     throw std::logic_error("Error in " + std::string(__func__) + " this is not a calculator\n the result is "
                                + std::to_string(scalar1 / scalar2) + " btw");
   }
   JImage &active_image = get_active_image();
   if (std::get<2>(type1) == SCALAR) {
-    auto mat = scalar1 / image2;
+    cv::MatExpr mat = scalar1 / image2;
     active_image = ImageProcessingCollection::make_jimage(mat);
   } else if (std::get<2>(type2) == SCALAR) {
-    auto mat = image1 / scalar2;
+    cv::MatExpr mat = image1 / scalar2;
     active_image = ImageProcessingCollection::make_jimage(mat);
   } else {
     if (image1.size != image2.size) {
       throw std::logic_error("Error in " + std::string(__func__) + " image size has to match");
     }
-    auto mat = image1 / image2;
+    cv::MatExpr mat = image1 / image2;
     active_image = ImageProcessingCollection::make_jimage(mat);
   }
+  save_to_history("div", (data_.current_args[0].string_arg + " " + data_.current_args[1].string_arg).c_str());
   update_status_bar_on_load();
   update_view();
 }
 
-void Backend::imresize() {
-  JImage &active_image = get_active_image();
-  int width = data_.current_args[0].int_arg;
-  int height = data_.current_args[1].int_arg;
-  ImageProcessingCollection::resize(active_image, active_image, width, height);
-  update_status_bar_on_load();
-  update_view();
+void Backend::imresize()
+{
+    JImage& active_image = get_active_image();
+    int width = data_.current_args[0].int_arg;
+    int height = data_.current_args[1].int_arg;
+    {
+        TIME_THIS
+        ImageProcessingCollection::resize(active_image, active_image, width, height);
+    }
+    update_status_bar_on_load();
+    update_view();
 }
 
-void Backend::imdft() {
-  JImage &active_image = get_active_image();
-  ImageProcessingCollection::discrete_fourier_transform(active_image, active_image);
-  update_status_bar_on_load();
-  update_view();
+void Backend::imdft()
+{
+    JImage& active_image = get_active_image();
+    {
+        TIME_THIS
+        ImageProcessingCollection::discrete_fourier_transform(active_image, active_image);
+    }
+    save_to_history("imdft", "");
+    update_status_bar_on_load();
+    update_view();
+}
+void Backend::merge()
+{
+    JImage& active_image = get_active_image();
+    auto type1 = get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[0].string_arg.c_str()));
+    auto type2 = get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[1].string_arg.c_str()));
+    auto type3 = get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[2].string_arg.c_str()));
+
+    if(std::get<2>(type1) == SCALAR || std::get<2>(type2) == SCALAR || std::get<2>(type3) == SCALAR){
+        throw std::logic_error("Error in: " + std::string(__func__) + ": can't merge with scalars");
+    }
+    JImage channel1 = std::get<0>(type1);
+    JImage channel2 = std::get<0>(type2);
+    JImage channel3 = std::get<0>(type3);
+    ImageProcessingCollection::convert_color(channel1, channel1, cv::COLOR_BGR2GRAY);
+    ImageProcessingCollection::convert_color(channel2, channel2, cv::COLOR_BGR2GRAY);
+    ImageProcessingCollection::convert_color(channel3, channel3, cv::COLOR_BGR2GRAY);
+    TIME_THIS
+    ImageProcessingCollection::merge(channel1, channel2, channel3, active_image);
+    save_to_history("div", (data_.current_args[0].string_arg + " " + data_.current_args[1].string_arg + " " + data_.current_args[1].string_arg).c_str());
+    update_status_bar_on_load();
+    update_view();
+}
+
+void Backend::clear()
+{
+    data_.active_image = JImage(cv::Mat(1, 1, CV_8UC1));
+    data_.active_snapshot_idx = 0;
+    data_.current_args = {};
+    data_.current_file_path = "";
+    data_.snapshot_count = 0;
+    data_.record_stop_index = 0;
+    data_.record_start_index = 0;
+    update_view();
+    update_status_bar_on_load();
+    save_to_history("clear", "");
+    emit clear_sig();
+}
+
+void Backend::echo()
+{
+    QString message = data_.current_args[0].string_arg.c_str();
+    QMessageBox::information(parent_, "Info", message);
+    save_to_history("echo", message);
 }
 
 void Backend::execute_command(const QString &command) {
@@ -594,8 +700,8 @@ void Backend::execute_command(const QString &command) {
 }
 
 void Backend::update_status_bar_on_load() {
-  JImage &active_image = get_active_image();
-  StatusBarInfoStatic info = {
+ JImage& active_image = get_active_image();
+  StatusBarInfoStatic info{
       active_image.get_file_path().c_str(),
       active_image.type_as_string().c_str(),
       QSize(active_image.rows, active_image.cols)

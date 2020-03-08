@@ -1,0 +1,16 @@
+clear
+open
+imresize 512 512
+snapshot
+imbinarize 50
+snapshot
+revert
+imbinarize 100
+snapshot
+revert
+imbinarize 150
+snapshot
+immerge s1 s2 s3
+snapshot
+impixelize 25
+snapshot

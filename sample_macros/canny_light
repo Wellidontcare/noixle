@@ -1,0 +1,16 @@
+clear
+open
+echo Please input a filter size big enough to reduce the image noise
+imfilter gaussian
+snapshot
+imcconvert gray
+echo Please set the y-derivative to 0
+imfilter sobel
+snapshot
+load_snapshot 0
+imcconvert gray
+echo Please set the x-derivative to 0
+imfilter sobel
+snapshot
+add s1 s2
+snapshot

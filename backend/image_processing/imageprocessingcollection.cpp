@@ -437,4 +437,16 @@ void discrete_fourier_transform(JImage in, JImage &out) {
   out = mag;
 }
 
+void merge(JImage in1, JImage in2, JImage in3, JImage &out)
+{
+    if((in1.channels() + in2.channels() + in3.channels()) > 3){
+        throw std::logic_error("Error in: " + std::string(__func__) + " resulting image has to many channels");
+    }
+    std::vector<cv::MatSize> sizes{in1.size, in2.size, in3.size};
+    if(!std::all_of(sizes.begin(), sizes.end(), [in1](cv::MatSize size){return size == in1.size;})){
+            throw std::logic_error("Error in: " + std::string(__func__) + " channels have to be the same size");
+    }
+    std::vector<cv::Mat> to_merge{in1, in2, in3};
+    cv::merge(to_merge, out);
+}
 }

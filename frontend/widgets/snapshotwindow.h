@@ -23,6 +23,7 @@ public:
 
 public slots:
     void add_snapshot(JImage);
+    void clear_action();
 signals:
 
 private:
