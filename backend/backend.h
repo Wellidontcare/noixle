@@ -71,6 +71,8 @@ public:
   void div();
   void imresize();
   void imdft();
+  void merge();
+  void clear();
 
 public slots:
   void execute_command(const QString &command);
@@ -91,6 +93,7 @@ signals:
   void histogram_updated_sig(QImage);
   void show_threshold_sig(int);
   void binarize_wizard_sig(JImage);
+  void clear_sig();
 
 private:
   void save_to_history(const QString &command, const QString &args);

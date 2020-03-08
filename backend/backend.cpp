@@ -36,7 +36,8 @@ void Backend::populate_function_lut() {
   function_lut_["mul"] = &Backend::mul;
   function_lut_["imresize"] = &Backend::imresize;
   function_lut_["imdft"] = &Backend::imdft;
-
+  function_lut_["immerge"] = &Backend::merge;
+  function_lut_["clear"] = &Backend::clear;
 }
 
 void Backend::backup() {
@@ -277,6 +278,7 @@ void Backend::imfilter() {
     break;
   }
   case SOBEL: {
+    //C++ 17 structured binding
     auto[x_order, y_order] = FilterParser::get_xy_order();
     int size = FilterParser::get_kernel_size();
     TIME_THIS
@@ -441,12 +443,12 @@ void Backend::add() {
       get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[0].string_arg.c_str()));
   auto type2 =
       get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[1].string_arg.c_str()));
-  auto image1 = std::get<0>(type1);
-  auto image2 = std::get<0>(type2);
+  JImage image1 = std::get<0>(type1);
+  JImage image2 = std::get<0>(type2);
   image1.convertTo(image1, CV_64F);
   image2.convertTo(image2, CV_64F);
-  auto scalar1 = std::get<1>(type1);
-  auto scalar2 = std::get<1>(type2);
+  double scalar1 = std::get<1>(type1);
+  double scalar2 = std::get<1>(type2);
   if (std::get<2>(type1) == SCALAR && std::get<2>(type2) == SCALAR) {
     throw std::logic_error("Error in " + std::string(__func__) + " this is not a calculator\n the result is "
                                + std::to_string(scalar1 + scalar2) + " btw");
@@ -456,13 +458,13 @@ void Backend::add() {
     auto mat = cv::Scalar(scalar1, scalar1, scalar1) + image2;
     active_image = ImageProcessingCollection::make_jimage(mat);
   } else if (std::get<2>(type2) == SCALAR) {
-    auto mat = image1 + cv::Scalar(scalar2, scalar2, scalar2);
+    cv::MatExpr mat = image1 + cv::Scalar(scalar2, scalar2, scalar2);
     active_image = ImageProcessingCollection::make_jimage(mat);
   } else {
     if (image1.size != image2.size) {
       throw std::logic_error("Error in " + std::string(__func__) + " image size has to match");
     }
-    auto mat = image1 + image2;
+    cv::MatExpr mat = image1 + image2;
     active_image = ImageProcessingCollection::make_jimage(mat);
   }
   update_status_bar_on_load();
@@ -474,12 +476,12 @@ void Backend::sub() {
       get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[0].string_arg.c_str()));
   auto type2 =
       get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[1].string_arg.c_str()));
-  auto image1 = std::get<0>(type1);
-  auto image2 = std::get<0>(type2);
+  JImage image1 = std::get<0>(type1);
+  JImage image2 = std::get<0>(type2);
   image1.convertTo(image1, CV_64F);
   image2.convertTo(image2, CV_64F);
-  auto scalar1 = std::get<1>(type1);
-  auto scalar2 = std::get<1>(type2);
+  double scalar1 = std::get<1>(type1);
+  double scalar2 = std::get<1>(type2);
   if (std::get<2>(type1) == SCALAR && std::get<2>(type2) == SCALAR) {
     throw std::logic_error("Error in " + std::string(__func__) + " this is not a calculator\n the result is "
                                + std::to_string(scalar1 - scalar2) + " btw");
@@ -507,12 +509,12 @@ void Backend::mul() {
       get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[0].string_arg.c_str()));
   auto type2 =
       get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[1].string_arg.c_str()));
-  auto image1 = std::get<0>(type1);
-  auto image2 = std::get<0>(type2);
+  JImage image1 = std::get<0>(type1);
+  JImage image2 = std::get<0>(type2);
   image1.convertTo(image1, CV_64F);
   image2.convertTo(image2, CV_64F);
-  auto scalar1 = std::get<1>(type1);
-  auto scalar2 = std::get<1>(type2);
+  double scalar1 = std::get<1>(type1);
+  double scalar2 = std::get<1>(type2);
   if (std::get<2>(type1) == SCALAR && std::get<2>(type2) == SCALAR) {
     throw std::logic_error("Error in " + std::string(__func__) + " this is not a calculator\n the result is "
                                + std::to_string(scalar1 * scalar2) + " btw");
@@ -522,13 +524,13 @@ void Backend::mul() {
     auto mat = scalar1 * image2;
     active_image = ImageProcessingCollection::make_jimage(mat);
   } else if (std::get<2>(type2) == SCALAR) {
-    auto mat = image1 * scalar2;
+    cv::MatExpr mat = image1 * scalar2;
     active_image = ImageProcessingCollection::make_jimage(mat);
   } else {
     if (image1.size != image2.size) {
       throw std::logic_error("Error in " + std::string(__func__) + " image size has to match");
     }
-    auto mat = image1 * image2;
+    cv::MatExpr mat = image1 * image2;
     active_image = ImageProcessingCollection::make_jimage(mat);
   }
   update_status_bar_on_load();
@@ -540,12 +542,12 @@ void Backend::div() {
       get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[0].string_arg.c_str()));
   auto type2 =
       get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[1].string_arg.c_str()));
-  auto image1 = std::get<0>(type1);
-  auto image2 = std::get<0>(type2);
+  JImage image1 = std::get<0>(type1);
+  JImage image2 = std::get<0>(type2);
   image1.convertTo(image1, CV_64F);
   image2.convertTo(image2, CV_64F);
-  auto scalar1 = std::get<1>(type1);
-  auto scalar2 = std::get<1>(type2);
+  double scalar1 = std::get<1>(type1);
+  double scalar2 = std::get<1>(type2);
   if (std::get<2>(type1) == SCALAR && std::get<2>(type2) == SCALAR) {
     throw std::logic_error("Error in " + std::string(__func__) + " this is not a calculator\n the result is "
                                + std::to_string(scalar1 / scalar2) + " btw");
@@ -560,28 +562,67 @@ void Backend::div() {
   } else {
     if (image1.size != image2.size) {
       throw std::logic_error("Error in " + std::string(__func__) + " image size has to match");
-    }
-    auto mat = image1 / image2;
-    active_image = ImageProcessingCollection::make_jimage(mat);
+}
   }
-  update_status_bar_on_load();
-  update_view();
 }
 
-void Backend::imresize() {
-  JImage &active_image = get_active_image();
-  int width = data_.current_args[0].int_arg;
-  int height = data_.current_args[1].int_arg;
-  ImageProcessingCollection::resize(active_image, active_image, width, height);
-  update_status_bar_on_load();
-  update_view();
+void Backend::imresize()
+{
+    JImage& active_image = get_active_image();
+    int width = data_.current_args[0].int_arg;
+    int height = data_.current_args[1].int_arg;
+    {
+        TIME_THIS
+        ImageProcessingCollection::resize(active_image, active_image, width, height);
+    }
+    update_status_bar_on_load();
+    update_view();
 }
 
-void Backend::imdft() {
-  JImage &active_image = get_active_image();
-  ImageProcessingCollection::discrete_fourier_transform(active_image, active_image);
-  update_status_bar_on_load();
-  update_view();
+void Backend::imdft()
+{
+    JImage& active_image = get_active_image();
+    {
+        TIME_THIS
+        ImageProcessingCollection::discrete_fourier_transform(active_image, active_image);
+    }
+    update_status_bar_on_load();
+    update_view();
+}
+void Backend::merge()
+{
+    JImage& active_image = get_active_image();
+    auto type1 = get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[0].string_arg.c_str()));
+    auto type2 = get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[1].string_arg.c_str()));
+    auto type3 = get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[2].string_arg.c_str()));
+
+    if(std::get<2>(type1) == SCALAR || std::get<2>(type2) == SCALAR || std::get<2>(type3) == SCALAR){
+        throw std::logic_error("Error in: " + std::string(__func__) + ": can't merge with scalars");
+    }
+    JImage channel1 = std::get<0>(type1);
+    JImage channel2 = std::get<0>(type2);
+    JImage channel3 = std::get<0>(type3);
+    ImageProcessingCollection::convert_color(channel1, channel1, cv::COLOR_BGR2GRAY);
+    ImageProcessingCollection::convert_color(channel2, channel2, cv::COLOR_BGR2GRAY);
+    ImageProcessingCollection::convert_color(channel3, channel3, cv::COLOR_BGR2GRAY);
+    TIME_THIS
+    ImageProcessingCollection::merge(channel1, channel2, channel3, active_image);
+    update_status_bar_on_load();
+    update_view();
+}
+
+void Backend::clear()
+{
+    data_.active_image = JImage(cv::Mat(1, 1, CV_8UC1));
+    data_.active_snapshot_idx = 0;
+    data_.current_args = {};
+    data_.current_file_path = "";
+    data_.snapshot_count = 0;
+    data_.record_stop_index = 0;
+    data_.record_start_index = 0;
+    update_view();
+    update_status_bar_on_load();
+    emit clear_sig();
 }
 
 void Backend::execute_command(const QString &command) {
@@ -594,8 +635,8 @@ void Backend::execute_command(const QString &command) {
 }
 
 void Backend::update_status_bar_on_load() {
-  JImage &active_image = get_active_image();
-  StatusBarInfoStatic info = {
+ JImage& active_image = get_active_image();
+  StatusBarInfoStatic info{
       active_image.get_file_path().c_str(),
       active_image.type_as_string().c_str(),
       QSize(active_image.rows, active_image.cols)

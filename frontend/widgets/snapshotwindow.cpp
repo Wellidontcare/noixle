@@ -20,7 +20,7 @@ SnapshotViewer::~SnapshotViewer()
 void SnapshotViewer::add_snapshot(JImage image)
 {
     auto view = new ZoomEnabledGraphicsView(this);
-    addTab(view, image.get_file_path().c_str());
+    addTab(view, QString::number(views_.size()));
     auto scene = new QGraphicsScene;
     auto pixmap = QPixmap::fromImage(image.as_qimage());
     scene->addPixmap(pixmap);
@@ -30,4 +30,15 @@ void SnapshotViewer::add_snapshot(JImage image)
     setCurrentIndex(count() - 1);
     view->fitInView(scene->itemsBoundingRect(), Qt::AspectRatioMode::KeepAspectRatio);
     setFixedSize(size());
+}
+
+void SnapshotViewer::clear_action()
+{
+    for(auto& view : views_){
+        if(view){
+            delete view;
+        }
+    }
+    views_.clear();
+    clear();
 }

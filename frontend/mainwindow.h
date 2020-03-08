@@ -39,6 +39,7 @@ public:
     ~MainWindow() override;
     void execute_command(const QString &command);
     void show_performance_info(const QString &performance_info);
+    void clear();
 
 private:
     Ui::MainWindow *ui;
@@ -50,6 +51,6 @@ protected:
 
     // QWidget interface
 protected:
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event) override;
 };
 #endif // MAINWINDOW_H
