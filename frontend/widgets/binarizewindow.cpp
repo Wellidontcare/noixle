@@ -2,23 +2,20 @@
 #include "ui_binarizewindow.h"
 
 BinarizeWindow::BinarizeWindow(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::BinarizeWindow)
-{
+        QWidget(parent),
+        ui(new Ui::BinarizeWindow) {
     ui->setupUi(this);
     setWindowFlag(Qt::Window);
     setWindowTitle("Binarize Wizard");
     connect(ui->horizontalSlider_2, &QSlider::valueChanged, this, &BinarizeWindow::update_binarize);
 }
 
-BinarizeWindow::~BinarizeWindow()
-{
+BinarizeWindow::~BinarizeWindow() {
     delete ui;
 }
 
-void BinarizeWindow::show_binarize_wizard(JImage image)
-{
-    if(image.channels() == 3)
+void BinarizeWindow::show_binarize_wizard(JImage image) {
+    if (image.channels() == 3)
         ImageProcessingCollection::convert_color(image, source_image_, cv::COLOR_BGR2GRAY);
     else
         source_image_ = image;
@@ -27,8 +24,7 @@ void BinarizeWindow::show_binarize_wizard(JImage image)
     show();
 }
 
-void BinarizeWindow::update_binarize(int threshold)
-{
+void BinarizeWindow::update_binarize(int threshold) {
     JImage thresholded = source_image_;
     JImage histogram;
     ImageProcessingCollection::histogram_gray_thresh(source_image_, histogram, threshold);
