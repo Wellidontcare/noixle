@@ -1,14 +1,9 @@
 #include "statusbar.h"
 
 StatusBar::StatusBar(QWidget *parent)
-    : QStatusBar (parent)
-    ,pos_label_(new QLabel("0 0", this))
-    ,rgb_label_(new QLabel("0 0 0", this))
-    ,format_label_(new QLabel("None", this))
-    ,file_path_label_(new QLabel("No image loaded", this))
-    ,dimensions_label_(new QLabel("0x0", this))
-    ,spacer_(new QLabel(" | ", this))
-{
+        : QStatusBar(parent), pos_label_(new QLabel("0 0", this)), rgb_label_(new QLabel("0 0 0", this)),
+          format_label_(new QLabel("None", this)), file_path_label_(new QLabel("No image loaded", this)),
+          dimensions_label_(new QLabel("0x0", this)), spacer_(new QLabel(" | ", this)) {
     addWidget(pos_label_);
     addWidget(spacer_);
     addWidget(rgb_label_);
@@ -18,15 +13,15 @@ StatusBar::StatusBar(QWidget *parent)
     rgb_label_->setTextFormat(Qt::TextFormat::RichText);
 }
 
-void StatusBar::update_dynamic(StatusBarInfoDynamic info)
-{
+void StatusBar::update_dynamic(StatusBarInfoDynamic info) {
     pos_label_->setText("X -> " + QString::number(info.x) + " " + "Y -> " + QString::number(info.y));
-    rgb_label_->setText("<b><FONT COLOR= '#ff5b77'>" + QString::number(info.r) + "   " + "<FONT COLOR= '#77ff5b'>" + QString::number(info.g) + "   " + "<FONT COLOR='#5b76ff'>" + QString::number(info.b));
+    rgb_label_->setText("<b><FONT COLOR= '#ff5b77'>" + QString::number(info.r) + "   " + "<FONT COLOR= '#77ff5b'>" +
+                        QString::number(info.g) + "   " + "<FONT COLOR='#5b76ff'>" + QString::number(info.b));
 }
 
-void StatusBar::update_on_image_load(StatusBarInfoStatic info)
-{
+void StatusBar::update_on_image_load(StatusBarInfoStatic info) {
     file_path_label_->setText("Filepath: " + info.file_name);
     format_label_->setText("Format: " + info.format);
-    dimensions_label_->setText("Dimensions: " + QString::number(info.dimensions.rwidth()) + "x" + QString::number(info.dimensions.rheight()));
+    dimensions_label_->setText("Dimensions: " + QString::number(info.dimensions.rwidth()) + "x" +
+                               QString::number(info.dimensions.rheight()));
 }
