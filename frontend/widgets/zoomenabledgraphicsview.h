@@ -21,7 +21,7 @@ public:
     ZoomEnabledGraphicsView(QWidget* parent = nullptr);
 
 public slots:
-    void update_image(const QImage &image);
+    void update_image(const QImage &image, bool recenter);
     void show_text(const QString &text);
     void emit_update_status_bar_sig(int x, int y);
     void zoom(bool zoom_in, bool fast_zoom);

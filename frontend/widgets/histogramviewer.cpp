@@ -13,6 +13,6 @@ HistogramViewer::HistogramViewer(QWidget *parent)
 
 void HistogramViewer::show_histogram(const QImage &hist)
 {
-    view_->update_image(hist);
+    view_->update_image(hist, true);
     show();
 }

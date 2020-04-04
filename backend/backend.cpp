@@ -39,6 +39,7 @@ void Backend::populate_function_lut() {
   function_lut_["immerge"] = &Backend::merge;
   function_lut_["clear"] = &Backend::clear;
   function_lut_["echo"] = &Backend::echo;
+  function_lut_["gol"] = &Backend::gameoflife;
 }
 
 void Backend::backup() {
@@ -101,10 +102,10 @@ bool Backend::is_revertable(const QString &command) {
   return command.startsWith("im") || command.length() == 3;
 }
 
-void Backend::update_view() {
+void Backend::update_view(bool recenter) {
   if (data_.active_image.empty())
     throw std::logic_error("Error in " + std::string(__func__) + "\nNo images loaded");
-  emit image_updated_sig(data_.active_image.as_qimage());
+  emit image_updated_sig(data_.active_image.as_qimage(), recenter);
 }
 
 void Backend::help() {
@@ -133,7 +134,7 @@ void Backend::open() {
       throw std::logic_error("Error in " + std::string(__func__) + "\nImage does not exist!");
     }
   }
-  update_view();
+  update_view(true);
   update_status_bar_on_load();
   save_to_history("open", open_file_path);
 }
@@ -393,7 +394,7 @@ void Backend::imcconvert() {
     ImageProcessingCollection::convert_color(active_image, active_image, color);
   }
   save_to_history("imcconvert", data_.current_args[0].string_arg.c_str());
-  emit image_updated_sig(active_image.as_qimage());
+  update_view();
   update_status_bar_on_load();
 }
 
@@ -430,6 +431,11 @@ void Backend::imbinarize() {
   if (active_image.channels() != 1) {
     ImageProcessingCollection::convert_color(active_image, active_image, cv::COLOR_BGR2GRAY);
   }
+  if(threshold == -1){
+      TIME_THIS
+      ImageProcessingCollection::otsu(active_image, active_image);
+  }
+  else
   {
     TIME_THIS
     ImageProcessingCollection::binarize(active_image, active_image, threshold);
@@ -736,4 +742,13 @@ void Backend::execute_macro(const QString &file_path) {
   while (getline(macro_file, command)) {
     execute_command(command.c_str());
   }
+}
+
+void Backend::gameoflife() {
+    JImage& active_image = get_active_image();
+    {
+        TIME_THIS
+        ImageProcessingCollection::gameoflife(active_image, active_image);
+    }
+    update_view();
 }

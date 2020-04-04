@@ -21,7 +21,7 @@ StatusBar::StatusBar(QWidget *parent)
 void StatusBar::update_dynamic(StatusBarInfoDynamic info)
 {
     pos_label_->setText("X -> " + QString::number(info.x) + " " + "Y -> " + QString::number(info.y));
-    rgb_label_->setText("<b><FONT COLOR= '#FF0000'>" + QString::number(info.r) + "   " + "<FONT COLOR= '#00FF00'>" + QString::number(info.g) + "   " + "<FONT COLOR='#0000FF'>" + QString::number(info.b));
+    rgb_label_->setText("<b><FONT COLOR= '#ff5b77'>" + QString::number(info.r) + "   " + "<FONT COLOR= '#77ff5b'>" + QString::number(info.g) + "   " + "<FONT COLOR='#5b76ff'>" + QString::number(info.b));
 }
 
 void StatusBar::update_on_image_load(StatusBarInfoStatic info)
