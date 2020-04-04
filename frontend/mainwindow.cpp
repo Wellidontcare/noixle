@@ -105,7 +105,8 @@ std::vector<Command> MainWindow::add_available_commands()
         {"mul", {}, false, {STRING, STRING},2, "[a b] | multiply a with b, image or scalar, i is active image, s marks snaphot images Example: mul s1 2"},
         {"div", {}, false, {STRING, STRING},2, "[a b] | divide a by b, image or scalar, i is active image, s marks snaphot images Example: div s2 s1"},
         {"imdft", {}, true, {}, 0, "| shows the spectral domain of the image"},
-        {"immerge", {}, false, {STRING, STRING, STRING}, 3, "[channel1 channel2 channel3] | merge channels, i is active image, s marks snaphot images Example: merge s0 s3"}
+        {"immerge", {}, false, {STRING, STRING, STRING}, 3, "[channel1 channel2 channel3] | merge channels, i is active image, s marks snaphot images Example: merge s0 s3"},
+        {"gol", {}, false, {}, 0, "Do one iteration of conway's game of life, each pixel is a cell (Image has to be binarised)"}
     };
     for(const Command& c : commands){
         options_.append(QString::fromStdString(c.command));

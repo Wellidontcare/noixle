@@ -42,7 +42,7 @@ Q_OBJECT
 
 public:
   Backend(const std::vector<Command> &available_commands, QWidget *parent = nullptr);
-  void update_view();
+  void update_view(bool recenter = false);
   void help();
   void exit();
   void open();
@@ -75,6 +75,7 @@ public:
   void merge();
   void clear();
   void echo();
+  void gameoflife();
 
 public slots:
   void execute_command(const QString &command);
@@ -85,7 +86,7 @@ public slots:
 
 signals:
   void help_request_sig();
-  void image_updated_sig(QImage);
+  void image_updated_sig(QImage, bool);
   void exit_sig();
   void update_status_bar_sig(StatusBarInfoStatic);
   void update_status_bar_dynamic_sig(StatusBarInfoDynamic);

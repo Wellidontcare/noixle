@@ -8,7 +8,7 @@ ZoomEnabledGraphicsView::ZoomEnabledGraphicsView(QWidget *parent)
     drag_key_released = true;
 }
 
-void ZoomEnabledGraphicsView::update_image(const QImage &image)
+void ZoomEnabledGraphicsView::update_image(const QImage &image, bool recenter)
 {
  scene_.clear();
  QPixmap pixmap = QPixmap::fromImage(image);
@@ -16,7 +16,7 @@ void ZoomEnabledGraphicsView::update_image(const QImage &image)
  scene_.addItem(image_item_);
  scene_.setSceneRect(image_item_->sceneBoundingRect());
  connect(image_item_, &MouseTrackerPixmapItem::mouse_hovers_pixel_sig, this, &ZoomEnabledGraphicsView::emit_update_status_bar_sig);
- fitInView(scene_.itemsBoundingRect(), Qt::KeepAspectRatio);
+ if(recenter) fitInView(scene_.itemsBoundingRect(), Qt::KeepAspectRatio);
 }
 
 void ZoomEnabledGraphicsView::show_text(const QString &text)

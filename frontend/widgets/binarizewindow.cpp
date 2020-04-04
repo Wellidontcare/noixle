@@ -22,7 +22,7 @@ void BinarizeWindow::show_binarize_wizard(JImage image)
         ImageProcessingCollection::convert_color(image, source_image_, cv::COLOR_BGR2GRAY);
     else
         source_image_ = image;
-    ui->graphicsView->update_image(image.as_qimage());
+    ui->graphicsView->update_image(image.as_qimage(), false);
     ui->horizontalSlider_2->setValue(127);
     show();
 }
@@ -34,5 +34,5 @@ void BinarizeWindow::update_binarize(int threshold)
     ImageProcessingCollection::histogram_gray_thresh(source_image_, histogram, threshold);
     emit thresh_hist_sig(histogram.as_qimage());
     ImageProcessingCollection::binarize(thresholded, thresholded, threshold);
-    ui->graphicsView->update_image(thresholded.as_qimage());
+    ui->graphicsView->update_image(thresholded.as_qimage(), false);
 }
