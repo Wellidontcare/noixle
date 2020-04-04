@@ -94,7 +94,7 @@ std::vector<Command> MainWindow::add_available_commands()
         {"histogram", {}, true, {STRING}, 1, "['cumulative'] | displays a histogram of the currently viewed image"},
         {"imequalize", {}, true, {}, 0, "| improves the image contrast by equalizing the histogram"},
         {"imgammacorrect", {}, false, {FLOAT}, 1, "| corrects the gamme by the specified value"},
-        {"imbinarize", {}, true, {INT}, 1, "[threshold] | binarizes the active image (if the function is called with no arguments a binarize test wizard is opened)"},
+        {"imbinarize", {}, true, {INT}, 1, "[threshold] | binarizes the active image (if the function is called with no arguments a binarize test wizard is opened, if threshold is -1 the threshold is determined by the otsu algorithm)"},
         {"imrotate", {}, false, {INT}, 1, "[angle in deg] | rotates the active image by the given angle to the left"},
         {"impixelize", {}, false, {INT}, 1, "[pixelsize] | pixelizes the active image"},
         {"imshadingcorrect", {}, true, {}, 0, "| corrects the shading on an image"},
@@ -106,15 +106,15 @@ std::vector<Command> MainWindow::add_available_commands()
         {"div", {}, false, {STRING, STRING},2, "[a b] | divide a by b, image or scalar, i is active image, s marks snaphot images Example: div s2 s1"},
         {"imdft", {}, true, {}, 0, "| shows the spectral domain of the image"},
         {"immerge", {}, false, {STRING, STRING, STRING}, 3, "[channel1 channel2 channel3] | merge channels, i is active image, s marks snaphot images Example: merge s0 s3"},
-        {"gol", {}, false, {}, 0, "Do one iteration of conway's game of life, each pixel is a cell (Image has to be binarised)"}
+        {"gol", {}, false, {}, 0, "| Do one iteration of conway's game of life, each pixel is a cell (Image has to be binarised)"}
     };
     for(const Command& c : commands){
         options_.append(QString::fromStdString(c.command));
         help_text_.append(QString::fromStdString(c.command) + " " + QString::fromStdString(c.help_text));
     }
     help_text_.append("Use Tab to autocomplete!");
-    help_text_.append("You can zoom with scrolling in and out while pressing Ctrl or Cmd or by using the + and - keys");
-    help_text_.append("You can move the view while being zoomed in by pressing Alt or Option and dragging the mouse");
+    help_text_.append("You can zoom with scrolling in and out while pressing Ctrl/Cmd or by using the + and - keys");
+    help_text_.append("You can move the view while being zoomed in by pressing Ctrl/Cmd + Alt/Option and dragging the mouse");
     help_window_->add_help_text(help_text_);
     return commands;
 }
