@@ -4,7 +4,7 @@ Imageprocessing with commandline-flavor.
 
 Build on Qt and OpenCV
 
-## install
+## build on linux
 1. clone the project
 2. cd inside the directory
 3. make a new directory called build
@@ -12,6 +12,9 @@ Build on Qt and OpenCV
 5. cd into build
 6. run make
 7. run the program with ./noixle
+
+## build on windows
+Generate buildfiles for visual studio with cmake
 
 ## usage
 * help | shows this message
