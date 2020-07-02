@@ -454,16 +454,16 @@ void Backend::add() {
   JImage &active_image = get_active_image();
   if (std::get<2>(type1) == SCALAR) {
     auto mat = cv::Scalar(scalar1, scalar1, scalar1) + image2;
-    active_image = ImageProcessingCollection::make_jimage(mat);
+    active_image = ImageProcessingCollection::make_jimage_from_MatExpr(mat);
   } else if (std::get<2>(type2) == SCALAR) {
     auto mat = image1 + cv::Scalar(scalar2, scalar2, scalar2);
-    active_image = ImageProcessingCollection::make_jimage(mat);
+    active_image = ImageProcessingCollection::make_jimage_from_MatExpr(mat);
   } else {
     if (image1.size != image2.size) {
       throw std::logic_error("Error in " + std::string(__func__) + " image size has to match");
     }
     auto mat = image1 + image2;
-    active_image = ImageProcessingCollection::make_jimage(mat);
+    active_image = ImageProcessingCollection::make_jimage_from_MatExpr(mat);
   }
   update_status_bar_on_load();
   update_view();
@@ -487,16 +487,16 @@ void Backend::sub() {
   JImage &active_image = get_active_image();
   if (std::get<2>(type1) == SCALAR) {
     auto mat = cv::Scalar(scalar1, scalar1, scalar1) - image2;
-    active_image = ImageProcessingCollection::make_jimage(mat);
+    active_image = ImageProcessingCollection::make_jimage_from_MatExpr(mat);
   } else if (std::get<2>(type2) == SCALAR) {
     auto mat = image1 - cv::Scalar(scalar2, scalar2, scalar2);
-    active_image = ImageProcessingCollection::make_jimage(mat);
+    active_image = ImageProcessingCollection::make_jimage_from_MatExpr(mat);
   } else {
     if (image1.size != image2.size) {
       throw std::logic_error("Error in " + std::string(__func__) + " image size has to match");
     }
     auto mat = image1 - image2;
-    active_image = ImageProcessingCollection::make_jimage(mat);
+    active_image = ImageProcessingCollection::make_jimage_from_MatExpr(mat);
   }
   update_status_bar_on_load();
   update_view();
@@ -509,8 +509,8 @@ void Backend::mul() {
       get_image_or_scalar_for_calc(CalculationParser::parse_calc_string(data_.current_args[1].string_arg.c_str()));
   auto image1 = std::get<0>(type1);
   auto image2 = std::get<0>(type2);
-  image1.convertTo(image1, CV_64F);
-  image2.convertTo(image2, CV_64F);
+  image1.convertTo(image1, CV_8UC1);
+  image2.convertTo(image2, CV_8UC1);
   auto scalar1 = std::get<1>(type1);
   auto scalar2 = std::get<1>(type2);
   if (std::get<2>(type1) == SCALAR && std::get<2>(type2) == SCALAR) {
@@ -520,16 +520,17 @@ void Backend::mul() {
   JImage &active_image = get_active_image();
   if (std::get<2>(type1) == SCALAR) {
     auto mat = scalar1 * image2;
-    active_image = ImageProcessingCollection::make_jimage(mat);
+    active_image = ImageProcessingCollection::make_jimage_from_MatExpr(mat);
   } else if (std::get<2>(type2) == SCALAR) {
     auto mat = image1 * scalar2;
-    active_image = ImageProcessingCollection::make_jimage(mat);
+    active_image = ImageProcessingCollection::make_jimage_from_MatExpr(mat);
   } else {
     if (image1.size != image2.size) {
       throw std::logic_error("Error in " + std::string(__func__) + " image size has to match");
     }
-    auto mat = image1 * image2;
-    active_image = ImageProcessingCollection::make_jimage(mat);
+    auto out_image = cv::Mat(image1.rows, image1.cols, image1.type());
+    cv::multiply(image1, image2, out_image);
+    active_image = out_image;
   }
   update_status_bar_on_load();
   update_view();
@@ -553,16 +554,16 @@ void Backend::div() {
   JImage &active_image = get_active_image();
   if (std::get<2>(type1) == SCALAR) {
     auto mat = scalar1 / image2;
-    active_image = ImageProcessingCollection::make_jimage(mat);
+    active_image = ImageProcessingCollection::make_jimage_from_MatExpr(mat);
   } else if (std::get<2>(type2) == SCALAR) {
     auto mat = image1 / scalar2;
-    active_image = ImageProcessingCollection::make_jimage(mat);
+    active_image = ImageProcessingCollection::make_jimage_from_MatExpr(mat);
   } else {
     if (image1.size != image2.size) {
       throw std::logic_error("Error in " + std::string(__func__) + " image size has to match");
     }
     auto mat = image1 / image2;
-    active_image = ImageProcessingCollection::make_jimage(mat);
+    active_image = ImageProcessingCollection::make_jimage_from_MatExpr(mat);
   }
   update_status_bar_on_load();
   update_view();

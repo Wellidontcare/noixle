@@ -364,7 +364,7 @@ void laplace(const JImage &in, JImage &out, int size) {
   cv::Laplacian(in, out, -1, size);
 }
 
-JImage make_jimage(cv::MatExpr expr) {
+JImage make_jimage_from_MatExpr(cv::MatExpr expr) {
   cv::Mat mat(expr);
   mat.convertTo(mat, CV_8UC1);
   return JImage(mat);
