@@ -567,8 +567,8 @@ void Backend::mul() {
                     CalculationParser::parse_calc_string(data_.current_args[1].string_arg.c_str()));
     JImage image1 = std::get<0>(type1);
     JImage image2 = std::get<0>(type2);
-    image1.convertTo(image1, CV_64F);
-    image2.convertTo(image2, CV_64F);
+    image1.convertTo(image1, CV_8UC3);
+    image2.convertTo(image2, CV_8UC3);
     double scalar1 = std::get<1>(type1);
     double scalar2 = std::get<1>(type2);
     if (std::get<2>(type1) == SCALAR && std::get<2>(type2) == SCALAR) {
@@ -586,12 +586,7 @@ void Backend::mul() {
         if (image1.size != image2.size) {
             throw std::logic_error("Error in " + std::string(__func__) + " image size has to match");
         }
-        if (image1.channels() > 1 || image2.channels() > 1) {
-            throw std::logic_error("Error in " + std::string(__func__) + " images have to be grayscale");
-
-        }
-        cv::MatExpr mat = image1 * image2;
-        active_image = ImageProcessingCollection::make_jimage(mat);
+        cv::multiply(image1, image2, active_image);
     }
     save_to_history("mul", (data_.current_args[0].string_arg + " " + data_.current_args[1].string_arg).c_str());
     update_status_bar_on_load();
