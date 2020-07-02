@@ -754,3 +754,11 @@ void Backend::gameoflife() {
     }
     update_view();
 }
+void Backend::cleanup_snapshots() {
+  QString tmp_file_path = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+  for(int i = data_.snapshot_count-1; i >= 0; --i){
+    QString snaphot_img_path = tmp_file_path + "/Snapshot" + QString::number(i) + ".tif";
+    QFile snapshot(snaphot_img_path);
+    snapshot.remove();
+  }
+}

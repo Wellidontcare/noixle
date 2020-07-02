@@ -112,6 +112,8 @@ public:
 
     void gameoflife();
 
+    void cleanup_snapshots();
+
 public slots:
 
     void execute_command(const QString &command);

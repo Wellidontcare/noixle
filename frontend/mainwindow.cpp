@@ -30,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow() {
     delete ui;
     snapshot_viewer_->clear_action();
+    backend_->cleanup_snapshots();
     if (snapshot_viewer_) {
         delete snapshot_viewer_;
     }
