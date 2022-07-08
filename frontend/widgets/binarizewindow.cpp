@@ -1,9 +1,12 @@
 #include "binarizewindow.h"
 #include "ui_binarizewindow.h"
+#include <qnamespace.h>
+#include <sstream>
 
-BinarizeWindow::BinarizeWindow(QWidget *parent) :
+BinarizeWindow::BinarizeWindow(Backend* backend, QWidget *parent) :
         QWidget(parent),
-        ui(new Ui::BinarizeWindow) {
+        ui(new Ui::BinarizeWindow),
+	backend(backend){
     ui->setupUi(this);
     setWindowFlag(Qt::Window);
     setWindowTitle("Binarize Wizard");
@@ -31,4 +34,21 @@ void BinarizeWindow::update_binarize(int threshold) {
     emit thresh_hist_sig(histogram.as_qimage());
     ImageProcessingCollection::binarize(thresholded, thresholded, threshold);
     ui->graphicsView->update_image(thresholded.as_qimage(), false);
+}
+
+void BinarizeWindow::finish_binarization(){
+	int val = ui->horizontalSlider_2->value();
+	std::stringstream command;
+	command << "imbinarize " << val;
+	backend->execute_command(QString::fromStdString(command.str()));
+	emit hist_close_sig();
+	close();
+}
+
+void BinarizeWindow::keyPressEvent(QKeyEvent *event) {
+    if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
+        finish_binarization();
+    } else {
+        BinarizeWindow::keyPressEvent(event);
+    }
 }

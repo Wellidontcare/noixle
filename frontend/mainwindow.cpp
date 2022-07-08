@@ -4,7 +4,7 @@
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), help_window_(new HelpWindow()), options_(),
           backend_(new Backend(add_available_commands(), parent)), snapshot_viewer_(new SnapshotViewer()),
-          histogram_viewer_(new HistogramViewer(this)), binarize_window_(new BinarizeWindow(this)),
+          histogram_viewer_(new HistogramViewer(this)), binarize_window_(new BinarizeWindow(backend_, this)),
           ui(new Ui::MainWindow) {
     snapshot_viewer_->setWindowFlag(Qt::Window);
     ui->setupUi(this);
@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(backend_, &Backend::histogram_updated_sig, histogram_viewer_, &HistogramViewer::show_histogram);
     connect(backend_, &Backend::binarize_wizard_sig, binarize_window_, &BinarizeWindow::show_binarize_wizard);
     connect(binarize_window_, &BinarizeWindow::thresh_hist_sig, histogram_viewer_, &HistogramViewer::show_histogram);
+    connect(binarize_window_, &BinarizeWindow::hist_close_sig, histogram_viewer_, &HistogramViewer::close);
     connect(backend_, &Backend::clear_sig, this, &MainWindow::clear);
 }
 
