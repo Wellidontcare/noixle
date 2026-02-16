@@ -1,5 +1,10 @@
 # noixle
 
+Disclaimer:
+This is a project I did for university. For serious image processing prototyping/exploration I would recommend python with napari, opencv and/or skimage and the other well documented image processing libraries :)
+
+Here comes:
+
 Imageprocessing with commandline-flavor.
 
 Build on Qt and OpenCV
