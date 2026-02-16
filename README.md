@@ -7,7 +7,7 @@ Here comes:
 
 Imageprocessing with commandline-flavor.
 
-Build on Qt and OpenCV
+Build on Qt and OpenCV with c++17ish
 
 ## build on linux
 1. clone the project
